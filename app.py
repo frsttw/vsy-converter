@@ -9,6 +9,7 @@ import threading
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+from discord_tab import DiscordTab
 
 
 APP_NAME = "Vsy Converter"
@@ -62,8 +63,8 @@ class ConverterApp(tk.Tk):
         icon_path = Path(__file__).resolve().parent / "assets" / "vs-conversor.ico"
         if icon_path.is_file():
             self.iconbitmap(str(icon_path))
-        self.geometry("900x680")
-        self.minsize(780, 580)
+        self.geometry("1000x850")
+        self.minsize(900, 800)
         self.files: list[Path] = []
         self.magick = find_magick()
         self.ffmpeg = find_ffmpeg()
@@ -81,6 +82,7 @@ class ConverterApp(tk.Tk):
         self.keep_metadata = tk.BooleanVar(value=True)
         self.status = tk.StringVar(value="Pronto para converter.")
         self._build_ui()
+        self.protocol("WM_DELETE_WINDOW", self._close)
         if not self.magick:
             self.after(200, lambda: messagebox.showerror(APP_NAME, "ImageMagick não foi encontrado. Reinstale-o e abra o aplicativo novamente."))
 
@@ -108,9 +110,15 @@ class ConverterApp(tk.Tk):
         style.map("TCheckbutton", background=[("active", PANEL)], indicatorbackground=[("selected", PURPLE)])
         style.configure("Horizontal.TProgressbar", troughcolor="#1d1725", background=PURPLE, bordercolor="#1d1725", lightcolor=MAGENTA, darkcolor=PURPLE)
         style.configure("Horizontal.TScale", background=PANEL, troughcolor="#24182f")
+        style.configure("TNotebook", background=BG, borderwidth=0)
+        style.configure("TNotebook.Tab", background=PANEL_ALT, foreground=TEXT, padding=(20, 10))
+        style.map("TNotebook.Tab", background=[("selected", "#553078")])
+        style.configure("TRadiobutton", background=PANEL, foreground=TEXT)
 
-        root = ttk.Frame(self, padding=26)
-        root.pack(fill="both", expand=True)
+        self.notebook = ttk.Notebook(self)
+        self.notebook.pack(fill="both", expand=True, padx=12, pady=12)
+        root = ttk.Frame(self.notebook, padding=26)
+        self.notebook.add(root, text="Conversor")
         header = ttk.Frame(root)
         header.pack(fill="x", pady=(0, 18))
         title_area = ttk.Frame(header)
@@ -178,6 +186,22 @@ class ConverterApp(tk.Tk):
         ttk.Label(bottom, textvariable=self.status, foreground=MUTED).pack(side="left")
         self.convert_button = ttk.Button(bottom, text="Converter agora", style="Accent.TButton", command=self.start_conversion)
         self.convert_button.pack(side="right")
+        self.discord_tab = DiscordTab(self.notebook, self)
+        self.notebook.add(self.discord_tab, text="Discord • Avatar e capa")
+
+    def _close(self):
+        if self.discord_tab.busy:
+            if messagebox.askyesno(APP_NAME, "Cancelar a exportação para Discord e fechar?"):
+                self.discord_tab.cancelled.set()
+                self._wait_close()
+        else:
+            self.destroy()
+
+    def _wait_close(self):
+        if self.discord_tab.busy:
+            self.after(150, self._wait_close)
+        else:
+            self.destroy()
 
     def _quality_changed(self, _value: str) -> None:
         self.quality_label.configure(text=f"{round(self.quality.get())}%")
@@ -206,6 +230,8 @@ class ConverterApp(tk.Tk):
             return str(Path.home() / "Documents" / "Documentos convertidos")
         if category == "videos":
             return str(Path.home() / "Videos" / "GIFs convertidos")
+        if category.startswith("discord_"):
+            return str(Path.home() / "Pictures" / "Discord" / ("Avatares" if category == "discord_avatar" else "Capas"))
         return str(Path.home() / "Pictures" / "Imagens convertidas")
 
     def _save_current_destination(self) -> None:
