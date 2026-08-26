@@ -1,5 +1,14 @@
 # Histórico de versões
 
+## 2.7.0
+
+- Nova aba Cortes para vídeo, áudio e GIF.
+- Campos de início e fim em segundos ou `HH:MM:SS.000`, com fim opcional.
+- Vídeo e áudio usam cópia direta dos fluxos, faixas e metadados, sem recompressão.
+- GIF é recodificado mantendo resolução e animação, com publicação temporária segura.
+- Pasta de cortes lembrada automaticamente.
+- Testes cobrindo vídeo, áudio, GIF, validação de intervalo e preservação do original.
+
 ## 2.6.1
 
 - Adicionada a marca discreta `frstt.dev` no cabeçalho do aplicativo e na apresentação do projeto.

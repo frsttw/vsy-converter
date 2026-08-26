@@ -4,7 +4,7 @@
   <p><strong>Conversão de imagens simples, rápida e sem terminal.</strong></p>
 
   ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-6d3cff?style=for-the-badge&logo=windows11&logoColor=white)
-  ![Versão](https://img.shields.io/badge/versão-2.6.1-b05cff?style=for-the-badge)
+  ![Versão](https://img.shields.io/badge/versão-2.7.0-b05cff?style=for-the-badge)
   ![ImageMagick](https://img.shields.io/badge/ImageMagick-7.1-8a4fff?style=for-the-badge)
 
   <br><br>
@@ -15,7 +15,7 @@
 
 ## Sobre
 
-O **Vsy Converter** oferece uma interface gráfica para o ImageMagick e o FFmpeg. Converta imagens e transforme vídeos em GIF sem memorizar comandos ou abrir o terminal.
+O **Vsy Converter** oferece uma interface gráfica para o ImageMagick e o FFmpeg. Converta imagens, transforme vídeos em GIF e corte mídias sem memorizar comandos ou abrir o terminal.
 
 ## Destaques
 
@@ -30,6 +30,8 @@ O **Vsy Converter** oferece uma interface gráfica para o ImageMagick e o FFmpeg
 - Controle de fluidez do GIF entre 10 e 60 FPS, com preferência memorizada.
 - Interface em grafite e violeta, com navegação no topo e opções organizadas em cartões.
 - Ações sempre acessíveis, rolagem em janelas menores e cancelamento nas duas áreas.
+- Aba Cortes para vídeo, áudio e GIF, com início/fim e saída no formato original.
+- Vídeo e áudio são cortados por cópia direta dos fluxos, sem recompressão ou perda de qualidade.
 - Instalador completo com o ImageMagick incluído.
 
 ## Como usar
@@ -68,6 +70,16 @@ O tempo de exportação depende da duração, resolução e conteúdo da animaç
 - GIFs preservam quadros e duração; podem perder cores e, no avatar, resolução (até 128×128).
 - Se não couber, nenhum resultado acima da meta é salvo. Use um trecho menor ou saída estática.
 - Cancelamento e pastas independentes memorizadas para avatar e capa.
+
+### Aba Cortes
+
+![Corte de vídeo, áudio e GIF](docs/cortes.png)
+
+- Escolha início e fim em segundos ou `HH:MM:SS.000`; deixe o fim vazio para usar até o final.
+- Vídeos e áudios mantêm seus fluxos, faixas, metadados e formato, sem recompressão.
+- Em alguns vídeos, a cópia direta pode alinhar o início ao keyframe mais próximo; isso evita reencodar e preservar a qualidade original.
+- GIFs são recodificados apenas porque o corte precisa remover quadros, mantendo resolução, duração e animação.
+- A pasta de cortes é lembrada separadamente e nenhum arquivo original é sobrescrito.
 
 As metas são margens conservadoras do aplicativo, não uma promessa de aceitação pelo Discord. A documentação de [perfis personalizados](https://support.discord.com/hc/en-us/articles/4403147417623-Custom-Profiles) indica capas PNG/JPG/GIF abaixo de 10 MB e no mínimo 680×240 px (consulta em 26/08/2026). O alvo de avatar é uma escolha conservadora do app; não representa um limite oficial documentado. Capas personalizadas e avatares animados dependem do Nitro. Esta aba não configura banners de servidores nem envia arquivos automaticamente.
 

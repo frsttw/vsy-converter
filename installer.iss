@@ -1,5 +1,5 @@
 #define MyAppName "Vsy Converter"
-#define MyAppVersion "2.6.1"
+#define MyAppVersion "2.7.0"
 #define MyAppPublisher "frsttw"
 #define MyAppExeName "Vsy Converter.exe"
 

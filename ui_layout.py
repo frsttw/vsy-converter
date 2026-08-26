@@ -101,7 +101,7 @@ def lock_controls(root, busy):
         root.saved_states = []
 
 
-def build_ui(app, discord_class, formats, fps_values):
+def build_ui(app, discord_class, cut_class, formats, fps_values):
     theme(app)
     header = ttk.Frame(app, padding=(32, 20, 32, 14))
     header.pack(fill="x")
@@ -113,7 +113,7 @@ def build_ui(app, discord_class, formats, fps_values):
     app.nav_buttons = []
     navigation = ttk.Frame(header)
     navigation.pack(side="right")
-    for index, text in enumerate(("Conversor", "Discord")):
+    for index, text in enumerate(("Conversor", "Discord", "Cortes")):
         button = ttk.Button(navigation, text=text, style="Nav.TButton", command=lambda i=index: app.notebook.select(i))
         button.pack(side="left", padx=5)
         app.nav_buttons.append(button)
@@ -187,6 +187,8 @@ def build_ui(app, discord_class, formats, fps_values):
     app.cancel_button.pack(side="left", padx=10)
     app.discord_tab = discord_class(app.notebook, app)
     app.notebook.add(app.discord_tab, text="Discord")
+    app.cut_tab = cut_class(app.notebook, app)
+    app.notebook.add(app.cut_tab, text="Cortes")
     def nav(event=None):
         selected = app.notebook.index(app.notebook.select())
         for i, button in enumerate(app.nav_buttons):
@@ -194,6 +196,7 @@ def build_ui(app, discord_class, formats, fps_values):
     app.notebook.bind("<<NotebookTabChanged>>", nav)
     def wheel(event):
         if event.widget.winfo_class() not in {"Listbox", "TCombobox"}:
-            (scroll if app.notebook.index(app.notebook.select()) == 0 else app.discord_tab.scroll).wheel(event)
+            scrolls = (scroll, app.discord_tab.scroll, app.cut_tab.scroll)
+            scrolls[app.notebook.index(app.notebook.select())].wheel(event)
     app.bind("<MouseWheel>", wheel)
     nav()

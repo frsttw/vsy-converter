@@ -78,7 +78,7 @@ class DiscordTests(unittest.TestCase):
         with patch.dict(os.environ, {"LOCALAPPDATA": str(self.directory)}):
             app = ConverterApp()
             try:
-                self.assertEqual(len(app.notebook.tabs()), 2)
+                self.assertEqual(len(app.notebook.tabs()), 3)
                 tab = app.discord_tab
                 tab.folder.set(str(self.directory / "avatars"))
                 tab.save_folder()

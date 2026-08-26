@@ -12,6 +12,7 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from discord_tab import DiscordTab
+from cut_tab import CutTab
 from discord_export import run_command, Cancelled, find_video_engine
 from ui_layout import lock_controls
 
@@ -93,19 +94,20 @@ class ConverterApp(tk.Tk):
 
     def _build_ui(self) -> None:
         from ui_layout import build_ui
-        build_ui(self, DiscordTab, OUTPUT_FORMATS, GIF_FPS_OPTIONS)
+        build_ui(self, DiscordTab, CutTab, OUTPUT_FORMATS, GIF_FPS_OPTIONS)
 
     def _close(self):
-        if self.discord_tab.busy or self.conversion_busy:
+        if self.discord_tab.busy or self.cut_tab.busy or self.conversion_busy:
             if messagebox.askyesno(APP_NAME, "Cancelar a conversão em andamento e fechar?"):
                 self.discord_tab.cancelled.set()
+                self.cut_tab.cancelled.set()
                 self.cancelled.set()
                 self._wait_close()
         else:
             self.destroy()
 
     def _wait_close(self):
-        if self.discord_tab.busy or self.conversion_busy:
+        if self.discord_tab.busy or self.cut_tab.busy or self.conversion_busy:
             self.after(150, self._wait_close)
         else:
             self.destroy()
@@ -143,6 +145,8 @@ class ConverterApp(tk.Tk):
             return str(Path.home() / "Documents" / "Documentos convertidos")
         if category == "videos":
             return str(Path.home() / "Videos" / "GIFs convertidos")
+        if category == "cortes":
+            return str(Path.home() / "Videos" / "Cortes")
         if category.startswith("discord_"):
             return str(Path.home() / "Pictures" / "Discord" / ("Avatares" if category == "discord_avatar" else "Capas"))
         return str(Path.home() / "Pictures" / "Imagens convertidas")
