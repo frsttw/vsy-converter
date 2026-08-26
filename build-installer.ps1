@@ -24,7 +24,7 @@ if (-not (Test-Path -LiteralPath $ffmpegExe)) {
 
 Push-Location $projectDir
 try {
-    py -m PyInstaller --noconfirm --clean --onefile --windowed --icon .\assets\vs-conversor.ico --name 'VS Conversor' .\app.py
+    py -m PyInstaller --noconfirm --clean --onefile --windowed --icon .\assets\vs-conversor.ico --add-data 'assets\vs-conversor.ico;assets' --name 'Vsy Converter' .\app.py
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao empacotar o aplicativo.' }
 
     $compiler = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'

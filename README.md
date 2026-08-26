@@ -1,21 +1,21 @@
 <div align="center">
-  <img src="docs/banner.png" alt="VS Conversor" width="100%">
+  <img src="docs/banner.png" alt="Vsy Converter" width="100%">
 
   <p><strong>Conversão de imagens simples, rápida e sem terminal.</strong></p>
 
   ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-6d3cff?style=for-the-badge&logo=windows11&logoColor=white)
-  ![Versão](https://img.shields.io/badge/versão-2.3.0-b05cff?style=for-the-badge)
+  ![Versão](https://img.shields.io/badge/versão-2.4.0-b05cff?style=for-the-badge)
   ![ImageMagick](https://img.shields.io/badge/ImageMagick-7.1-8a4fff?style=for-the-badge)
 
   <br><br>
-  <a href="https://github.com/frsttw/vs-conversor/releases/latest/download/Instalador-VS-Conversor.exe">
-    <img src="https://img.shields.io/badge/BAIXAR%20PARA%20WINDOWS-9f50e8?style=for-the-badge&logo=windows11&logoColor=white" alt="Baixar VS Conversor">
+  <a href="https://github.com/frsttw/vsy-converter/releases/latest/download/Instalador-Vsy-Converter.exe">
+    <img src="https://img.shields.io/badge/BAIXAR%20PARA%20WINDOWS-9f50e8?style=for-the-badge&logo=windows11&logoColor=white" alt="Baixar Vsy Converter">
   </a>
 </div>
 
 ## Sobre
 
-O **VS Conversor** oferece uma interface gráfica moderna para o ImageMagick. Ele foi pensado para quem quer converter ou redimensionar imagens sem memorizar comandos e sem abrir o terminal.
+O **Vsy Converter** oferece uma interface gráfica para o ImageMagick e o FFmpeg. Converta imagens e transforme vídeos em GIF sem memorizar comandos ou abrir o terminal.
 
 ## Destaques
 
@@ -50,7 +50,9 @@ O **VS Conversor** oferece uma interface gráfica moderna para o ImageMagick. El
 
 ## Instalação
 
-Baixe `Instalador-VS-Conversor.exe` na seção **Releases** e siga o assistente. O pacote instala tudo o que é necessário e cria um atalho na Área de Trabalho.
+Baixe `Instalador-Vsy-Converter.exe` na seção **Releases** e siga o assistente. O pacote inclui ImageMagick e FFmpeg e cria um atalho na Área de Trabalho.
+
+As preferências de pasta e FPS das versões anteriores são preservadas na atualização.
 
 ## Tecnologias
 
@@ -75,7 +77,7 @@ O instalador será criado em `installer-output`.
 ## Estrutura
 
 ```text
-VS Conversor
+Vsy Converter
 ├── app.py                  # Aplicação desktop
 ├── assets/                 # Identidade visual e ícone
 ├── docs/                   # Materiais da página do projeto

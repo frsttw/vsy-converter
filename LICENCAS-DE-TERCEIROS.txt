@@ -1,6 +1,6 @@
 COMPONENTES DE TERCEIROS
 
-VS Conversor utiliza os seguintes projetos independentes:
+Vsy Converter utiliza os seguintes projetos independentes:
 
 ImageMagick
 Site: https://imagemagick.org/

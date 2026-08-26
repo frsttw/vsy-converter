@@ -1,18 +1,18 @@
-#define MyAppName "VS Conversor"
-#define MyAppVersion "2.3.0"
+#define MyAppName "Vsy Converter"
+#define MyAppVersion "2.4.0"
 #define MyAppPublisher "frsttw"
-#define MyAppExeName "VS Conversor.exe"
+#define MyAppExeName "Vsy Converter.exe"
 
 [Setup]
 AppId={{8D79474E-87A2-49E0-92F9-00D41EF6F230}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={autopf}\VS Conversor
+DefaultDirName={autopf}\Vsy Converter
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputDir=installer-output
-OutputBaseFilename=Instalador-VS-Conversor
+OutputBaseFilename=Instalador-Vsy-Converter
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
@@ -42,10 +42,13 @@ Name: "desktopicon"; Description: "Criar um atalho na Área de Trabalho"; GroupD
 
 [Run]
 Filename: "{tmp}\ImageMagick-installer.exe"; Parameters: "/VERYSILENT /NORESTART /SP-"; StatusMsg: "Instalando o ImageMagick..."; Flags: waituntilterminated; Check: not ImageMagickInstalled
-Filename: "{app}\{#MyAppExeName}"; Description: "Abrir o VS Conversor"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#MyAppExeName}"; Description: "Abrir o Vsy Converter"; Flags: nowait postinstall skipifsilent
 
 [InstallDelete]
 Type: files; Name: "{app}\Conversor de Imagens.exe"
+Type: files; Name: "{app}\VS Conversor.exe"
+Type: files; Name: "{autodesktop}\VS Conversor.lnk"
+Type: files; Name: "{autoprograms}\VS Conversor.lnk"
 
 [Code]
 function ImageMagickInstalled: Boolean;

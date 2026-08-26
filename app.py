@@ -11,7 +11,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 
-APP_NAME = "VS Conversor"
+APP_NAME = "Vsy Converter"
 BG = "#09090d"
 PANEL = "#12121a"
 PANEL_ALT = "#181822"
@@ -59,6 +59,9 @@ class ConverterApp(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title(APP_NAME)
+        icon_path = Path(__file__).resolve().parent / "assets" / "vs-conversor.ico"
+        if icon_path.is_file():
+            self.iconbitmap(str(icon_path))
         self.geometry("900x680")
         self.minsize(780, 580)
         self.files: list[Path] = []
@@ -112,7 +115,7 @@ class ConverterApp(tk.Tk):
         header.pack(fill="x", pady=(0, 18))
         title_area = ttk.Frame(header)
         title_area.pack(side="left")
-        ttk.Label(title_area, text="VS CONVERSOR", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(title_area, text="Vsy Converter", style="Title.TLabel").pack(anchor="w")
         ttk.Label(title_area, text="powered by ImageMagick  •  simples, rápido e sem terminal", style="Hint.TLabel").pack(anchor="w", pady=(3, 0))
         ttk.Label(header, text="● PRONTO", foreground=GREEN, background=BG, font=("Consolas", 10, "bold")).pack(side="right", anchor="n", pady=10)
 
@@ -299,7 +302,7 @@ class ConverterApp(tk.Tk):
             messagebox.showwarning(APP_NAME, "Vídeos podem ser convertidos para GIF. Selecione GIF como formato de saída.")
             return
         if has_video and not self.ffmpeg:
-            messagebox.showerror(APP_NAME, "O componente FFmpeg não foi encontrado. Reinstale o VS Conversor.")
+            messagebox.showerror(APP_NAME, "O componente FFmpeg não foi encontrado. Reinstale o Vsy Converter.")
             return
         try:
             geometry = self._resize_geometry()
