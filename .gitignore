@@ -1,0 +1,7 @@
+build/
+dist/
+installer-output/
+vendor/
+*.spec
+__pycache__/
+*.pyc

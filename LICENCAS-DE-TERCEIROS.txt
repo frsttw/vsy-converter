@@ -1,0 +1,15 @@
+COMPONENTES DE TERCEIROS
+
+VS Conversor utiliza os seguintes projetos independentes:
+
+ImageMagick
+Site: https://imagemagick.org/
+Licença: https://imagemagick.org/script/license.php
+
+FFmpeg
+Site: https://ffmpeg.org/
+Código-fonte: https://ffmpeg.org/download.html
+Build para Windows: https://www.gyan.dev/ffmpeg/builds/
+Licença do build distribuído: GPL versão 3
+
+Esses componentes pertencem aos seus respectivos autores e projetos.
