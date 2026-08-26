@@ -1,12 +1,21 @@
 Vsy Converter
 
 1. Abra "Vsy Converter" pelo atalho da Área de Trabalho.
-2. Clique em "Adicionar arquivos..." e escolha uma ou mais imagens.
+2. Clique em "+ Adicionar" e escolha imagens ou vídeos (vídeos geram GIF).
 3. Selecione o formato desejado e, se quiser, altere qualidade ou tamanho.
 4. Escolha a pasta de destino.
-5. Clique em "Converter agora".
+5. Clique em "Converter arquivos".
 
 O aplicativo nunca substitui os arquivos originais. Se já existir um arquivo com o
 mesmo nome, ele cria uma cópia numerada.
 
-O programa usa o ImageMagick instalado no computador.
+Na área Discord, escolha uma imagem ou GIF e selecione Avatar ou Capa de perfil.
+A pasta de cada tipo é lembrada. AUTO mantém a animação; PNG/JPG salvam só o
+primeiro quadro. O app verifica as dimensões e o tamanho antes de salvar.
+
+GIFs são processados pelo FFmpeg com progresso por quadro durante a codificação.
+A análise de cores e as tentativas de compressão podem levar mais tempo em GIFs
+longos. Se não couber na meta, o app explica o motivo, sem alterar seu original.
+
+Use Cancelar para interromper. Os botões continuam acessíveis em janelas menores.
+O programa usa ImageMagick e FFmpeg, incluídos no instalador.

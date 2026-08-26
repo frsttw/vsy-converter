@@ -1,4 +1,5 @@
 import os
+import gc
 import subprocess
 import tempfile
 import threading
@@ -13,6 +14,8 @@ from discord_export import convert_image, PRESETS, Cancelled
 
 class DiscordTests(unittest.TestCase):
     def setUp(self):
+        # Recolhe janelas de testes anteriores na thread responsável pelo Tk.
+        gc.collect()
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.directory = Path(self.temp.name)
@@ -54,6 +57,16 @@ class DiscordTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "acima da margem"):
                 convert_image(self.magick, self.source, destination, "banner", "crop", "PNG")
         self.assertEqual(list(destination.iterdir()), [])
+
+    def test_fast_gif_timing_and_transparent_margins(self):
+        gif = self.directory / 'rapido.gif'
+        self.run_magick('-delay', '1', '-size', '80x40', 'xc:red', '-delay', '2',
+                        '-size', '80x40', 'xc:blue', '-loop', '0', str(gif))
+        percentages = []
+        path, _ = convert_image(self.magick, gif, self.directory, 'avatar', 'contain', 'GIF', percent=percentages.append)
+        self.assertEqual(self.run_magick('identify', '-format', '%T\n', str(path)), '1\n2\n')
+        self.assertEqual(self.run_magick(str(path) + '[0]', '-coalesce', '-format', '%[fx:p{0,0}.a]', 'info:'), '0')
+        self.assertIn(100, percentages)
 
     def test_cancel(self):
         event = threading.Event()

@@ -6,10 +6,14 @@ import shutil
 import subprocess
 import sys
 import threading
+import tempfile
+import queue
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from discord_tab import DiscordTab
+from discord_export import run_command, Cancelled, find_video_engine
+from ui_layout import lock_controls
 
 
 APP_NAME = "Vsy Converter"
@@ -50,10 +54,7 @@ def find_magick() -> str | None:
 
 
 def find_ffmpeg() -> str | None:
-    beside_app = Path(sys.executable).resolve().parent / "ffmpeg.exe"
-    if beside_app.exists():
-        return str(beside_app)
-    return shutil.which("ffmpeg")
+    return find_video_engine()
 
 
 class ConverterApp(tk.Tk):
@@ -63,8 +64,11 @@ class ConverterApp(tk.Tk):
         icon_path = Path(__file__).resolve().parent / "assets" / "vs-conversor.ico"
         if icon_path.is_file():
             self.iconbitmap(str(icon_path))
-        self.geometry("1000x850")
-        self.minsize(900, 800)
+        self.geometry(f"1100x{min(900, self.winfo_screenheight() - 100)}")
+        self.minsize(900, 620)
+        self.conversion_busy = False
+        self.cancelled = threading.Event()
+        self.events = queue.Queue()
         self.files: list[Path] = []
         self.magick = find_magick()
         self.ffmpeg = find_ffmpeg()
@@ -82,129 +86,38 @@ class ConverterApp(tk.Tk):
         self.keep_metadata = tk.BooleanVar(value=True)
         self.status = tk.StringVar(value="Pronto para converter.")
         self._build_ui()
+        self.poll_id = self.after(150, self._poll_conversion)
         self.protocol("WM_DELETE_WINDOW", self._close)
         if not self.magick:
             self.after(200, lambda: messagebox.showerror(APP_NAME, "ImageMagick não foi encontrado. Reinstale-o e abra o aplicativo novamente."))
 
     def _build_ui(self) -> None:
-        self.configure(bg=BG)
-        style = ttk.Style(self)
-        style.theme_use("clam")
-        style.configure("TFrame", background=BG)
-        style.configure("Card.TFrame", background=PANEL)
-        style.configure("TLabel", background=BG, foreground=TEXT, font=("Segoe UI", 10))
-        style.configure("Card.TLabel", background=PANEL, foreground=TEXT)
-        style.configure("Title.TLabel", font=("Segoe UI", 24, "bold"), foreground="#dfb7ff", background=BG)
-        style.configure("Hint.TLabel", font=("Segoe UI", 10), foreground=MUTED, background=BG)
-        style.configure("CardHint.TLabel", font=("Segoe UI", 9), foreground=MUTED, background=PANEL)
-        style.configure("TLabelframe", background=PANEL, bordercolor="#3b2450", lightcolor="#3b2450", darkcolor="#3b2450", relief="solid")
-        style.configure("TLabelframe.Label", background=PANEL, foreground="#d8a7ff", font=("Segoe UI", 10, "bold"))
-        style.configure("TButton", background=PANEL_ALT, foreground=TEXT, bordercolor="#453357", padding=(12, 7), font=("Segoe UI", 9))
-        style.map("TButton", background=[("active", "#292138")], bordercolor=[("active", PURPLE)])
-        style.configure("Accent.TButton", background=PURPLE, foreground="#ffffff", bordercolor=MAGENTA, font=("Segoe UI", 11, "bold"), padding=(22, 11))
-        style.map("Accent.TButton", background=[("active", MAGENTA), ("disabled", "#3d3348")])
-        style.configure("TEntry", fieldbackground="#0d0d13", foreground=TEXT, insertcolor=TEXT, bordercolor="#49315e", padding=6)
-        style.configure("TCombobox", fieldbackground="#0d0d13", background=PANEL_ALT, foreground=TEXT, arrowcolor="#d8a7ff", bordercolor="#49315e", padding=5)
-        style.map("TCombobox", fieldbackground=[("readonly", "#0d0d13")], foreground=[("readonly", TEXT)])
-        style.configure("TCheckbutton", background=PANEL, foreground=TEXT, indicatorbackground="#0d0d13", indicatorforeground=PURPLE)
-        style.map("TCheckbutton", background=[("active", PANEL)], indicatorbackground=[("selected", PURPLE)])
-        style.configure("Horizontal.TProgressbar", troughcolor="#1d1725", background=PURPLE, bordercolor="#1d1725", lightcolor=MAGENTA, darkcolor=PURPLE)
-        style.configure("Horizontal.TScale", background=PANEL, troughcolor="#24182f")
-        style.configure("TNotebook", background=BG, borderwidth=0)
-        style.configure("TNotebook.Tab", background=PANEL_ALT, foreground=TEXT, padding=(20, 10))
-        style.map("TNotebook.Tab", background=[("selected", "#553078")])
-        style.configure("TRadiobutton", background=PANEL, foreground=TEXT)
-
-        self.notebook = ttk.Notebook(self)
-        self.notebook.pack(fill="both", expand=True, padx=12, pady=12)
-        root = ttk.Frame(self.notebook, padding=26)
-        self.notebook.add(root, text="Conversor")
-        header = ttk.Frame(root)
-        header.pack(fill="x", pady=(0, 18))
-        title_area = ttk.Frame(header)
-        title_area.pack(side="left")
-        ttk.Label(title_area, text="Vsy Converter", style="Title.TLabel").pack(anchor="w")
-        ttk.Label(title_area, text="powered by ImageMagick  •  simples, rápido e sem terminal", style="Hint.TLabel").pack(anchor="w", pady=(3, 0))
-        ttk.Label(header, text="● PRONTO", foreground=GREEN, background=BG, font=("Consolas", 10, "bold")).pack(side="right", anchor="n", pady=10)
-
-        files_box = ttk.LabelFrame(root, text=" 01  ARQUIVOS ", padding=12)
-        files_box.pack(fill="both", expand=True)
-        buttons = ttk.Frame(files_box)
-        buttons.pack(fill="x", pady=(0, 8))
-        ttk.Button(buttons, text="Adicionar arquivos...", command=self.add_files).pack(side="left")
-        ttk.Button(buttons, text="Remover selecionados", command=self.remove_selected).pack(side="left", padx=8)
-        ttk.Button(buttons, text="Limpar lista", command=self.clear_files).pack(side="left")
-        self.file_count = ttk.Label(buttons, text="0 arquivos")
-        self.file_count.pack(side="right")
-
-        list_frame = ttk.Frame(files_box)
-        list_frame.pack(fill="both", expand=True)
-        self.file_list = tk.Listbox(list_frame, selectmode="extended", font=("Segoe UI", 10), borderwidth=1, relief="solid", bg="#0c0c12", fg=TEXT, selectbackground="#7434a9", selectforeground="#ffffff", highlightbackground="#3b2450", highlightcolor=PURPLE, activestyle="none")
-        scrollbar = ttk.Scrollbar(list_frame, orient="vertical", command=self.file_list.yview)
-        self.file_list.configure(yscrollcommand=scrollbar.set)
-        self.file_list.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-        options = ttk.LabelFrame(root, text=" 02  CONFIGURAÇÕES ", padding=12)
-        options.pack(fill="x", pady=12)
-        ttk.Label(options, text="Formato de saída:").grid(row=0, column=0, sticky="w")
-        self.format_combo = ttk.Combobox(options, textvariable=self.output_format, values=OUTPUT_FORMATS, state="readonly", width=9)
-        self.format_combo.grid(row=0, column=1, sticky="w", padx=(8, 22))
-        self.format_combo.bind("<<ComboboxSelected>>", self._format_changed)
-        ttk.Label(options, text="Qualidade:").grid(row=0, column=2, sticky="w")
-        ttk.Scale(options, from_=1, to=100, variable=self.quality, orient="horizontal", length=160, command=self._quality_changed).grid(row=0, column=3, padx=8)
-        self.quality_label = ttk.Label(options, text="90%", width=5)
-        self.quality_label.grid(row=0, column=4, sticky="w")
-        ttk.Checkbutton(options, text="Manter metadados (data, câmera etc.)", variable=self.keep_metadata).grid(row=0, column=5, padx=(18, 0), sticky="w")
-
-        ttk.Label(options, text="FPS do GIF:").grid(row=2, column=0, pady=(12, 0), sticky="w")
-        self.fps_combo = ttk.Combobox(options, textvariable=self.gif_fps, values=GIF_FPS_OPTIONS, state="readonly", width=7)
-        self.fps_combo.grid(row=2, column=1, pady=(12, 0), padx=(8, 22), sticky="w")
-        self.fps_combo.bind("<<ComboboxSelected>>", lambda _event: self._save_gif_fps())
-        ttk.Label(options, text="Use 60 para máxima fluidez; o arquivo ficará maior.", style="CardHint.TLabel").grid(row=2, column=2, columnspan=4, pady=(12, 0), sticky="w")
-
-        ttk.Checkbutton(options, text="Redimensionar", variable=self.resize_enabled, command=self._toggle_resize).grid(row=1, column=0, pady=(12, 0), sticky="w")
-        ttk.Label(options, text="Largura:").grid(row=1, column=1, pady=(12, 0), sticky="e")
-        self.width_entry = ttk.Entry(options, textvariable=self.width, width=8, state="disabled")
-        self.width_entry.grid(row=1, column=2, pady=(12, 0), padx=(8, 18), sticky="w")
-        ttk.Label(options, text="Altura:").grid(row=1, column=3, pady=(12, 0), sticky="e")
-        self.height_entry = ttk.Entry(options, textvariable=self.height, width=8, state="disabled")
-        self.height_entry.grid(row=1, column=4, pady=(12, 0), padx=8, sticky="w")
-        ttk.Label(options, text="Deixe um campo vazio para manter a proporção.", style="Hint.TLabel").grid(row=1, column=5, pady=(12, 0), sticky="w")
-
-        destination = ttk.LabelFrame(root, text=" 03  DESTINO ", padding=12)
-        destination.pack(fill="x")
-        self.destination_entry = ttk.Entry(destination, textvariable=self.output_dir)
-        self.destination_entry.pack(side="left", fill="x", expand=True)
-        self.destination_entry.bind("<FocusOut>", lambda _event: self._save_current_destination())
-        ttk.Button(destination, text="Escolher pasta...", command=self.choose_output).pack(side="left", padx=(8, 0))
-
-        bottom = ttk.Frame(root)
-        bottom.pack(fill="x", pady=(14, 0))
-        self.progress = ttk.Progressbar(bottom, mode="determinate")
-        self.progress.pack(fill="x", pady=(0, 7))
-        ttk.Label(bottom, textvariable=self.status, foreground=MUTED).pack(side="left")
-        self.convert_button = ttk.Button(bottom, text="Converter agora", style="Accent.TButton", command=self.start_conversion)
-        self.convert_button.pack(side="right")
-        self.discord_tab = DiscordTab(self.notebook, self)
-        self.notebook.add(self.discord_tab, text="Discord • Avatar e capa")
+        from ui_layout import build_ui
+        build_ui(self, DiscordTab, OUTPUT_FORMATS, GIF_FPS_OPTIONS)
 
     def _close(self):
-        if self.discord_tab.busy:
-            if messagebox.askyesno(APP_NAME, "Cancelar a exportação para Discord e fechar?"):
+        if self.discord_tab.busy or self.conversion_busy:
+            if messagebox.askyesno(APP_NAME, "Cancelar a conversão em andamento e fechar?"):
                 self.discord_tab.cancelled.set()
+                self.cancelled.set()
                 self._wait_close()
         else:
             self.destroy()
 
     def _wait_close(self):
-        if self.discord_tab.busy:
+        if self.discord_tab.busy or self.conversion_busy:
             self.after(150, self._wait_close)
         else:
             self.destroy()
 
     def _quality_changed(self, _value: str) -> None:
         self.quality_label.configure(text=f"{round(self.quality.get())}%")
+
+    def destroy(self):
+        self.cancelled.set()
+        if hasattr(self, 'poll_id'):
+            self.after_cancel(self.poll_id)
+        super().destroy()
 
     @staticmethod
     def _format_category(output_format: str) -> str:
@@ -317,6 +230,8 @@ class ConverterApp(tk.Tk):
         return f"{width}x{height}"
 
     def start_conversion(self) -> None:
+        if self.conversion_busy:
+            return
         if not self.magick:
             messagebox.showerror(APP_NAME, "ImageMagick não foi encontrado.")
             return
@@ -335,17 +250,22 @@ class ConverterApp(tk.Tk):
         except ValueError as exc:
             messagebox.showwarning(APP_NAME, str(exc))
             return
-        destination = Path(self.output_dir.get().strip())
-        if not str(destination):
+        if not self.output_dir.get().strip():
             messagebox.showwarning(APP_NAME, "Escolha uma pasta de destino.")
             return
+        destination = Path(self.output_dir.get().strip())
         self._save_current_destination()
         self.convert_button.configure(state="disabled")
-        self.progress.configure(maximum=len(self.files), value=0)
+        self.cancel_button.configure(state='normal')
+        self.cancelled.clear()
+        self.conversion_busy = True
+        lock_controls(self.converter_content, True)
+        self.progress.configure(mode='indeterminate', value=0)
+        self.progress.start(12)
         self.status.set("Iniciando...")
         self._save_gif_fps()
         settings = (self.output_format.get().lower(), str(round(self.quality.get())), self.keep_metadata.get(), int(self.gif_fps.get()))
-        threading.Thread(target=self._convert_all, args=(destination, geometry, settings), daemon=True).start()
+        threading.Thread(target=self._convert_all, args=(destination, geometry, settings, tuple(self.files)), daemon=True).start()
 
     @staticmethod
     def _unique_output(directory: Path, stem: str, extension: str) -> Path:
@@ -356,57 +276,99 @@ class ConverterApp(tk.Tk):
             number += 1
         return candidate
 
-    def _convert_all(self, destination: Path, geometry: str | None, settings: tuple[str, str, bool, int]) -> None:
-        destination.mkdir(parents=True, exist_ok=True)
-        errors: list[str] = []
-        extension, quality, keep_metadata, gif_fps = settings
-        for index, source in enumerate(self.files, start=1):
-            output = self._unique_output(destination, source.stem, extension)
-            self.after(0, self.status.set, f"Convertendo {index} de {len(self.files)}: {source.name}")
-            is_video = source.suffix.lower() in VIDEO_EXTENSIONS
-            if is_video:
-                scale = "scale='min(960,iw)':-2:flags=lanczos"
-                command = [self.ffmpeg, "-y", "-i", str(source), "-vf", f"fps={gif_fps},{scale},split[s0][s1];[s0]palettegen=max_colors=256[p];[s1][p]paletteuse=dither=sierra2_4a", "-loop", "0", str(output)]
-            else:
-                command = [self.magick, str(source)]
-            if geometry:
-                if is_video:
-                    width, height = geometry.split("x", 1)
-                    if width and height:
-                        video_scale = f"scale={width}:{height}:flags=lanczos"
-                    elif width:
-                        video_scale = f"scale={width}:-2:flags=lanczos"
-                    else:
-                        video_scale = f"scale=-2:{height}:flags=lanczos"
-                    command[command.index("-vf") + 1] = f"fps={gif_fps},{video_scale},split[s0][s1];[s0]palettegen=max_colors=256[p];[s1][p]paletteuse=dither=sierra2_4a"
-                else:
-                    command.extend(["-resize", geometry])
-            if not is_video:
-                command.extend(["-quality", quality])
-                if not keep_metadata:
-                    command.append("-strip")
-                if extension in {"jpg", "jpeg"}:
-                    command.extend(["-background", "white", "-alpha", "remove", "-alpha", "off"])
-                command.append(str(output))
-            try:
-                result = subprocess.run(command, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-                if result.returncode != 0:
-                    errors.append(f"{source.name}: {result.stderr.strip() or 'erro desconhecido'}")
-            except Exception as exc:
-                errors.append(f"{source.name}: {exc}")
-            self.after(0, self.progress.configure, {"value": index})
-        self.after(0, self._finished, destination, errors)
+    def cancel_conversion(self):
+        self.cancelled.set()
+        self.status.set("Cancelando… Os arquivos originais serão preservados.")
 
-    def _finished(self, destination: Path, errors: list[str]) -> None:
-        self.convert_button.configure(state="normal")
-        converted = len(self.files) - len(errors)
-        if errors:
-            self.status.set(f"Concluído: {converted} convertido(s), {len(errors)} erro(s).")
-            details = "\n\n".join(errors[:5])
-            messagebox.showwarning(APP_NAME, f"{converted} arquivo(s) convertido(s).\n\nAlguns arquivos falharam:\n{details}")
+    def _convert_all(self, destination, geometry, settings, sources):
+        errors = []
+        converted = 0
+        extension, quality, keep_metadata, gif_fps = settings
+        try:
+            destination.mkdir(parents=True, exist_ok=True)
+            for index, source in enumerate(sources, 1):
+                if self.cancelled.is_set():
+                    raise Cancelled()
+                prefix = f"Arquivo {index}/{len(sources)} · {source.name}"
+                self.events.put(("status", prefix))
+                with tempfile.TemporaryDirectory(prefix='.vsy-convert-', dir=destination) as temp:
+                    output = Path(temp) / ("resultado." + extension)
+                    is_video = source.suffix.lower() in VIDEO_EXTENSIONS
+                    if is_video:
+                        scale = "scale='min(960,iw)':-2:flags=lanczos"
+                        if geometry:
+                            width, height = geometry.split('x', 1)
+                            scale = f"scale={width or '-2'}:{height or '-2'}:flags=lanczos"
+                            if width and height:
+                                scale += ':force_original_aspect_ratio=decrease'
+                        graph = f"fps={gif_fps},{scale},split[a][b];[a]palettegen=stats_mode=single[p];[b][p]paletteuse=new=1:dither=bayer"
+                        command = [self.ffmpeg, '-hide_banner', '-loglevel', 'error', '-nostdin', '-y',
+                                   '-i', str(source), '-filter_complex_threads', '2', '-filter_complex',
+                                   graph, '-loop', '0', str(output)]
+                    else:
+                        command = [self.magick, str(source)]
+                        if geometry:
+                            command += ['-resize', geometry]
+                        command += ['-quality', quality]
+                        if not keep_metadata:
+                            command += ['-strip']
+                        if extension in {'jpg', 'jpeg'}:
+                            command += ['-background', 'white', '-alpha', 'remove', '-alpha', 'off']
+                        command += [str(output)]
+                    try:
+                        run_command(command, self.cancelled,
+                                    lambda elapsed: self.events.put(('status', f'{prefix} · {elapsed:.0f}s')))
+                        if self.cancelled.is_set():
+                            raise Cancelled()
+                        generated = sorted(Path(temp).glob('resultado*.' + extension))
+                        if not generated:
+                            raise RuntimeError('O conversor não gerou um arquivo de saída.')
+                        for item in generated:
+                            stem = source.stem if len(generated) == 1 else source.stem + item.stem.removeprefix('resultado')
+                            target = self._unique_output(destination, stem, extension)
+                            # No Windows rename nunca substitui um arquivo existente.
+                            while True:
+                                try:
+                                    item.rename(target)
+                                    break
+                                except FileExistsError:
+                                    target = self._unique_output(destination, stem, extension)
+                        converted += 1
+                    except Cancelled:
+                        raise
+                    except Exception as exc:
+                        errors.append(f'{source.name}: {exc}')
+        except Cancelled:
+            pass
+        except Exception as exc:
+            errors.append(str(exc))
+        finally:
+            self.events.put(('done', (destination, errors, converted, self.cancelled.is_set())))
+
+    def _poll_conversion(self):
+        while not self.events.empty():
+            event, value = self.events.get_nowait()
+            if event == 'status':
+                self.status.set(value)
+            else:
+                self._finished(*value)
+        self.poll_id = self.after(150, self._poll_conversion)
+
+    def _finished(self, destination, errors, converted, cancelled=False):
+        self.conversion_busy = False
+        lock_controls(self.converter_content, False)
+        self.progress.stop()
+        self.progress.configure(mode='determinate', maximum=100, value=0 if cancelled or errors else 100)
+        self.convert_button.configure(state='normal')
+        self.cancel_button.configure(state='disabled')
+        if cancelled:
+            self.status.set(f'Cancelado · {converted} arquivo(s) concluído(s). Originais preservados.')
+        elif errors:
+            self.status.set(f'Concluído · {converted} convertido(s), {len(errors)} erro(s).')
+            messagebox.showwarning(APP_NAME, '\n\n'.join(errors[:5]))
         else:
-            self.status.set(f"Pronto! {converted} arquivo(s) convertido(s).")
-            if messagebox.askyesno(APP_NAME, f"Conversão concluída!\n\nAbrir a pasta de destino?"):
+            self.status.set(f'Pronto! {converted} arquivo(s) convertido(s).')
+            if messagebox.askyesno(APP_NAME, 'Conversão concluída!\n\nAbrir a pasta de destino?'):
                 os.startfile(destination)
 
 

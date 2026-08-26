@@ -6,11 +6,12 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
 from discord_export import PRESETS, IMAGE_PATTERNS, convert_image, Cancelled
+from ui_layout import lock_controls
 
 
 class DiscordTab(ttk.Frame):
     def __init__(self, notebook, app):
-        super().__init__(notebook, padding=22)
+        super().__init__(notebook)
         self.app = app
         self.events = queue.Queue()
         self.cancelled = threading.Event()
@@ -23,44 +24,8 @@ class DiscordTab(ttk.Frame):
         self.status = tk.StringVar(value="Escolha uma imagem ou GIF. O arquivo original não será alterado.")
         self.hint = tk.StringVar()
         self.result = None
-        ttk.Label(self, text="Seu perfil, no tamanho certo", style="Title.TLabel").pack(anchor="w", pady=(0, 8))
-        ttk.Label(self, text="Avatar e capa de perfil pessoal • exportação local, sem envio ao Discord", style="Hint.TLabel").pack(anchor="w", pady=(0, 18))
-        ttk.Button(self, text="Escolher imagem ou GIF...", command=self.choose_source).pack(anchor="w")
-        ttk.Entry(self, textvariable=self.source, state="readonly").pack(fill="x", pady=10)
-        targets = ttk.Frame(self)
-        targets.pack(fill="x", pady=8)
-        for key, preset in PRESETS.items():
-            ttk.Radiobutton(targets, text=preset.label, variable=self.kind, value=key,
-                            command=self.target_changed).pack(side="left", padx=(0, 28))
-        ttk.Label(self, textvariable=self.hint, wraplength=700).pack(anchor="w", pady=10)
-        options = ttk.LabelFrame(self, text=" Enquadramento e formato ", padding=14)
-        options.pack(fill="x", pady=10)
-        ttk.Radiobutton(options, text="Preencher (recorte central)", variable=self.fit, value="crop").pack(anchor="w")
-        ttk.Radiobutton(options, text="Mostrar tudo (com margens, sem esticar)", variable=self.fit, value="contain").pack(anchor="w", pady=6)
-        row = ttk.Frame(options)
-        row.pack(fill="x", pady=6)
-        ttk.Label(row, text="Saída:").pack(side="left")
-        ttk.Combobox(row, textvariable=self.output_format, values=("AUTO", "PNG", "JPG", "GIF"), width=8, state="readonly").pack(side="left", padx=10)
-        ttk.Label(options, text="AUTO preserva animações em GIF. PNG/JPG salvam somente o primeiro quadro.\nO avatar aparece circular no Discord: mantenha o rosto ou logo no centro.", wraplength=690).pack(anchor="w", pady=4)
-        ttk.Label(self, text="Pasta de destino (lembrada separadamente para avatar e capa):").pack(anchor="w", pady=(12, 6))
-        row = ttk.Frame(self)
-        row.pack(fill="x")
-        entry = ttk.Entry(row, textvariable=self.folder)
-        entry.pack(side="left", fill="x", expand=True)
-        entry.bind("<FocusOut>", lambda _: self.save_folder())
-        ttk.Button(row, text="Escolher...", command=self.choose_folder).pack(side="right", padx=8)
-        ttk.Label(self, text="Capas personalizadas e avatares animados exigem Nitro.\nO tamanho é verificado após a conversão; GIFs muito longos podem não caber.\nGIFs mantêm a duração e os quadros; a otimização pode reduzir cores e a resolução do avatar.", style="Hint.TLabel", wraplength=710).pack(anchor="w", pady=14)
-        self.progress = ttk.Progressbar(self, mode="indeterminate")
-        self.progress.pack(fill="x")
-        ttk.Label(self, textvariable=self.status, wraplength=710).pack(anchor="w", pady=10)
-        actions = ttk.Frame(self)
-        actions.pack(fill="x")
-        self.export_button = ttk.Button(actions, text="Preparar para Discord", style="Accent.TButton", command=self.start)
-        self.export_button.pack(side="left")
-        self.cancel_button = ttk.Button(actions, text="Cancelar", command=self.cancelled.set, state="disabled")
-        self.cancel_button.pack(side="left", padx=10)
-        self.open_button = ttk.Button(actions, text="Abrir pasta do resultado", command=self.open_result, state="disabled")
-        self.open_button.pack(side="right")
+        from discord_layout import build_discord
+        build_discord(self)
         self.active_kind = self.kind.get()
         self.update_hint()
         self.poll_id = self.after(150, self.poll)
@@ -106,10 +71,12 @@ class DiscordTab(ttk.Frame):
                 self.kind.get(), self.fit.get(), self.output_format.get())
         self.cancelled.clear()
         self.busy = True
+        lock_controls(self.scroll.body, True)
         self.result = None
         self.export_button.configure(state="disabled")
         self.open_button.configure(state="disabled")
         self.cancel_button.configure(state="normal")
+        self.progress.configure(mode='indeterminate', value=0)
         self.progress.start(12)
         self.status.set("Preparando...")
         threading.Thread(target=self.worker, args=(args,), daemon=True).start()
@@ -117,7 +84,8 @@ class DiscordTab(ttk.Frame):
     def worker(self, args):
         try:
             path, summary = convert_image(*args, cancelled=self.cancelled,
-                                          progress=lambda value: self.events.put(("status", value)))
+                                          progress=lambda value: self.events.put(("status", value)),
+                                          percent=lambda value: self.events.put(("percent", value)))
             self.events.put(("done", (path, summary)))
         except Cancelled:
             self.events.put(("cancelled", "Cancelado. O original foi preservado."))
@@ -127,14 +95,22 @@ class DiscordTab(ttk.Frame):
     def poll(self):
         while not self.events.empty():
             event, value = self.events.get_nowait()
+            if event == 'percent':
+                self.progress.stop()
+                self.progress.configure(mode='indeterminate' if value < 0 else 'determinate', maximum=100, value=max(0, value))
+                if value < 0:
+                    self.progress.start(12)
+                continue
             if event == "status":
                 self.status.set(value)
                 continue
             self.busy = False
+            lock_controls(self.scroll.body, False)
             self.progress.stop()
             self.export_button.configure(state="normal")
             self.cancel_button.configure(state="disabled")
             if event == "done":
+                self.progress.configure(value=100)
                 self.result, summary = value
                 self.status.set(f"Pronto: {self.result.name}\n{summary}")
                 self.open_button.configure(state="normal")

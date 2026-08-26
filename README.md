@@ -4,7 +4,7 @@
   <p><strong>Conversão de imagens simples, rápida e sem terminal.</strong></p>
 
   ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-6d3cff?style=for-the-badge&logo=windows11&logoColor=white)
-  ![Versão](https://img.shields.io/badge/versão-2.5.0-b05cff?style=for-the-badge)
+  ![Versão](https://img.shields.io/badge/versão-2.6.0-b05cff?style=for-the-badge)
   ![ImageMagick](https://img.shields.io/badge/ImageMagick-7.1-8a4fff?style=for-the-badge)
 
   <br><br>
@@ -28,7 +28,8 @@ O **Vsy Converter** oferece uma interface gráfica para o ImageMagick e o FFmpeg
 - Memória automática da pasta de destino para cada tipo de saída.
 - Conversão para GIF de formatos de vídeo modernos, antigos, profissionais e de celular suportados pelo FFmpeg.
 - Controle de fluidez do GIF entre 10 e 60 FPS, com preferência memorizada.
-- Interface escura, responsiva e inteiramente em português.
+- Interface em grafite e violeta, com navegação no topo e opções organizadas em cartões.
+- Ações sempre acessíveis, rolagem em janelas menores e cancelamento nas duas áreas.
 - Instalador completo com o ImageMagick incluído.
 
 ## Como usar
@@ -37,11 +38,27 @@ O **Vsy Converter** oferece uma interface gráfica para o ImageMagick e o FFmpeg
 2. Escolha o formato de saída e a qualidade.
 3. Se desejar, ative o redimensionamento.
 4. Selecione a pasta de destino.
-5. Pressione **Converter agora**.
+5. Pressione **Converter arquivos**.
+
+## Interface
+
+![Conversor com navegação superior, cartões e tema escuro](docs/interface.png)
+
+### Novidades da versão 2.6
+
+- Novo layout para o conversor e a área Discord, mantendo a identidade violeta.
+- GIFs na área Discord usam uma paleta global em duas passagens de leitura sequencial pelo FFmpeg, evitando armazenar todos os quadros descompactados de uma vez.
+- Durante a codificação, o progresso mostra o quadro atual, o total e o tempo da etapa. A análise de cores tem indicador de atividade próprio.
+- Exportações acima da meta informam o tamanho obtido, sem salvar um resultado inadequado.
+- Conversão geral com cancelamento, arquivos temporários e configurações protegidas durante o processamento.
+
+O tempo de exportação depende da duração, resolução e conteúdo da animação. Se uma tentativa ultrapassar a meta, o app tenta menos cores. Não corta a duração nem reduz os quadros automaticamente.
 
 ## Formatos
 
 ### Aba Discord
+
+![Preparação de avatar e capa de perfil](docs/discord.png)
 
 - Avatar quadrado de 512×512 px ou capa de perfil de 680×240 px.
 - Recorte central ou ajuste completo com margens, sem distorção.
@@ -59,6 +76,8 @@ As metas são margens conservadoras do aplicativo, não uma promessa de aceitaç
 | Vídeos | MP4, MKV, MOV, AVI, WebM, WMV, MPEG, MTS, VOB, 3GP e outros formatos reconhecidos pelo FFmpeg | GIF de 10 a 60 FPS |
 
 > A disponibilidade de formatos especiais de imagem depende dos codecs incluídos no ImageMagick. Os vídeos são validados diretamente pelo FFmpeg.
+
+> GIF registra os intervalos em centésimos de segundo. A opção 60 FPS distribui os tempos entre quadros; a fluidez exibida também depende do navegador ou aplicativo que reproduz o arquivo.
 
 ## Instalação
 
@@ -85,6 +104,12 @@ Com Python 3, PyInstaller e Inno Setup 6 instalados, execute:
 ```
 
 O instalador será criado em `installer-output`.
+
+Para executar os testes de conversão e interface, com ImageMagick e FFmpeg disponíveis:
+
+```powershell
+py -m unittest discover -v
+```
 
 ## Estrutura
 
