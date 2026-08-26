@@ -1,5 +1,9 @@
 # Histórico de versões
 
+## 2.6.1
+
+- Adicionada a marca discreta `frstt.dev` no cabeçalho do aplicativo e na apresentação do projeto.
+
 ## 2.6.0
 
 ### Interface

@@ -4,7 +4,7 @@
   <p><strong>Conversão de imagens simples, rápida e sem terminal.</strong></p>
 
   ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-6d3cff?style=for-the-badge&logo=windows11&logoColor=white)
-  ![Versão](https://img.shields.io/badge/versão-2.6.0-b05cff?style=for-the-badge)
+  ![Versão](https://img.shields.io/badge/versão-2.6.1-b05cff?style=for-the-badge)
   ![ImageMagick](https://img.shields.io/badge/ImageMagick-7.1-8a4fff?style=for-the-badge)
 
   <br><br>
@@ -51,6 +51,7 @@ O **Vsy Converter** oferece uma interface gráfica para o ImageMagick e o FFmpeg
 - Durante a codificação, o progresso mostra o quadro atual, o total e o tempo da etapa. A análise de cores tem indicador de atividade próprio.
 - Exportações acima da meta informam o tamanho obtido, sem salvar um resultado inadequado.
 - Conversão geral com cancelamento, arquivos temporários e configurações protegidas durante o processamento.
+- Crédito visual discreto para o site pessoal `frstt.dev` no cabeçalho do aplicativo.
 
 O tempo de exportação depende da duração, resolução e conteúdo da animação. Se uma tentativa ultrapassar a meta, o app tenta menos cores. Não corta a duração nem reduz os quadros automaticamente.
 
@@ -125,5 +126,5 @@ Vsy Converter
 ---
 
 <div align="center">
-  Desenvolvido por <a href="https://github.com/frsttw">@frsttw</a>
+  Desenvolvido por <a href="https://github.com/frsttw">@frsttw</a> · <a href="https://frstt.dev">frstt.dev</a>
 </div>

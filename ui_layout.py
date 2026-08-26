@@ -2,6 +2,7 @@
 from pathlib import Path
 import tkinter as tk
 from tkinter import ttk
+import webbrowser
 
 BG = "#1b1b1f"
 CARD = "#121215"
@@ -24,6 +25,7 @@ def theme(app):
     style.configure("TLabel", background=BG, foreground=TEXT)
     style.configure("Title.TLabel", font=("Segoe UI", 23, "bold"), foreground=TEXT)
     style.configure("Hint.TLabel", foreground=MUTED, font=("Segoe UI", 10))
+    style.configure("Watermark.TLabel", foreground="#9e79c7", font=("Segoe UI", 9))
     style.configure("Card.TLabel", background=CARD)
     style.configure("CardTitle.TLabel", background=CARD, font=("Segoe UI", 12, "bold"))
     style.configure("CardHint.TLabel", background=CARD, foreground=MUTED, font=("Segoe UI", 9))
@@ -115,6 +117,9 @@ def build_ui(app, discord_class, formats, fps_values):
         button = ttk.Button(navigation, text=text, style="Nav.TButton", command=lambda i=index: app.notebook.select(i))
         button.pack(side="left", padx=5)
         app.nav_buttons.append(button)
+    app.site_credit = ttk.Label(header, text="frstt.dev", style="Watermark.TLabel", cursor="hand2")
+    app.site_credit.pack(side="right", padx=(0, 18))
+    app.site_credit.bind("<Button-1>", lambda _event: webbrowser.open("https://frstt.dev"))
     app.notebook = ttk.Notebook(app)
     app.notebook.pack(fill="both", expand=True, padx=8)
     host = ttk.Frame(app.notebook)
