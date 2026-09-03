@@ -24,7 +24,3 @@ Na aba "Cortes", escolha um vídeo, áudio ou GIF, informe o início e o fim e
 pressione "Cortar mídia". Vídeos e áudios são copiados sem recompressão; GIFs
 são recodificados para remover os quadros do trecho, mantendo resolução e animação.
 Use segundos ou HH:MM:SS.000. Deixe o fim vazio para cortar até o final.
-
-Para iniciar o Vsy Converter automaticamente com o Windows, marque a opção
-"Abrir o Vsy Converter junto com o Windows" no cartão Destino. Essa opção pode
-ser desativada pelo mesmo local.

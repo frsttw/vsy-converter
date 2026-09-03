@@ -15,7 +15,6 @@ from discord_tab import DiscordTab
 from cut_tab import CutTab
 from discord_export import run_command, Cancelled, find_video_engine
 from ui_layout import lock_controls
-from startup import is_enabled, set_enabled
 
 
 APP_NAME = "Vsy Converter"
@@ -87,7 +86,6 @@ class ConverterApp(tk.Tk):
         self.height = tk.StringVar()
         self.keep_metadata = tk.BooleanVar(value=True)
         self.status = tk.StringVar(value="Pronto para converter.")
-        self.startup_enabled = tk.BooleanVar(value=is_enabled())
         self._build_ui()
         self.poll_id = self.after(150, self._poll_conversion)
         self.protocol("WM_DELETE_WINDOW", self._close)
@@ -116,14 +114,6 @@ class ConverterApp(tk.Tk):
 
     def _quality_changed(self, _value: str) -> None:
         self.quality_label.configure(text=f"{round(self.quality.get())}%")
-
-    def toggle_startup(self):
-        try:
-            set_enabled(self.startup_enabled.get())
-            self.status.set("Inicialização do Windows atualizada.")
-        except OSError as exc:
-            self.startup_enabled.set(not self.startup_enabled.get())
-            messagebox.showerror(APP_NAME, f"Não foi possível atualizar a inicialização do Windows.\n\n{exc}")
 
     def destroy(self):
         self.cancelled.set()

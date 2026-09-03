@@ -1,5 +1,10 @@
 # Histórico de versões
 
+## 2.8.2
+
+- O aplicativo não é mais registrado para abrir automaticamente com o Windows.
+- O instalador mantém somente o atalho no menu Iniciar.
+
 ## 2.8.1
 
 - Atalho do aplicativo corrigido para aparecer somente no menu Iniciar.
@@ -15,7 +20,7 @@
 
 ## 2.7.1
 
-- Adicionada a opção **Abrir o Vsy Converter junto com o Windows**.
+- A opção de abertura automática que existia nessa versão foi posteriormente removida na 2.8.2; o comportamento atual é somente manual pelo menu Iniciar.
 - Registro de inicialização visível nas configurações de aplicativos de inicialização do Windows.
 - Ativação e desativação disponíveis diretamente no aplicativo, sem exigir permissões de administrador.
 

@@ -1,5 +1,5 @@
 #define MyAppName "Vsy Converter"
-#define MyAppVersion "2.8.1"
+#define MyAppVersion "2.8.2"
 #define MyAppPublisher "frsttw"
 #define MyAppExeName "Vsy Converter.exe"
 
@@ -32,9 +32,6 @@ Source: "LEIA-ME.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "LICENCAS-DE-TERCEIROS.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "vendor\ffmpeg.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "vendor\ImageMagick-installer.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
-
-[Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Vsy Converter"; ValueData: "{app}\{#MyAppExeName}"; Flags: uninsdeletevalue
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
