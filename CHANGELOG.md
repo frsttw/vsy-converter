@@ -1,5 +1,19 @@
 # Histórico de versões
 
+## 2.8.0
+
+- Nova aba **Cortes** para vídeo, áudio e GIF.
+- Corte por início e fim em segundos ou `HH:MM:SS.000`.
+- Vídeos e áudios usam cópia direta dos fluxos para evitar perda por recompressão.
+- GIFs são recodificados mantendo resolução, duração e animação.
+- Pasta de cortes lembrada automaticamente e cancelamento seguro.
+
+## 2.7.1
+
+- Adicionada a opção **Abrir o Vsy Converter junto com o Windows**.
+- Registro de inicialização visível nas configurações de aplicativos de inicialização do Windows.
+- Ativação e desativação disponíveis diretamente no aplicativo, sem exigir permissões de administrador.
+
 ## 2.7.0
 
 - Nova aba Cortes para vídeo, áudio e GIF.

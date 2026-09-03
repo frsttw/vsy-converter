@@ -4,7 +4,7 @@
   <p><strong>Conversão de imagens simples, rápida e sem terminal.</strong></p>
 
   ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-6d3cff?style=for-the-badge&logo=windows11&logoColor=white)
-  ![Versão](https://img.shields.io/badge/versão-2.7.0-b05cff?style=for-the-badge)
+  ![Versão](https://img.shields.io/badge/versão-2.8.0-b05cff?style=for-the-badge)
   ![ImageMagick](https://img.shields.io/badge/ImageMagick-7.1-8a4fff?style=for-the-badge)
 
   <br><br>
@@ -54,6 +54,7 @@ O **Vsy Converter** oferece uma interface gráfica para o ImageMagick e o FFmpeg
 - Exportações acima da meta informam o tamanho obtido, sem salvar um resultado inadequado.
 - Conversão geral com cancelamento, arquivos temporários e configurações protegidas durante o processamento.
 - Crédito visual discreto para o site pessoal `frstt.dev` no cabeçalho do aplicativo.
+- Opção para abrir automaticamente com o Windows, visível nas configurações de inicialização do usuário.
 
 O tempo de exportação depende da duração, resolução e conteúdo da animação. Se uma tentativa ultrapassar a meta, o app tenta menos cores. Não corta a duração nem reduz os quadros automaticamente.
 
@@ -97,6 +98,10 @@ As metas são margens conservadoras do aplicativo, não uma promessa de aceitaç
 Baixe `Instalador-Vsy-Converter.exe` na seção **Releases** e siga o assistente. O pacote inclui ImageMagick e FFmpeg e cria um atalho na Área de Trabalho.
 
 As preferências de pasta e FPS das versões anteriores são preservadas na atualização.
+
+### Inicialização com o Windows
+
+Marque **Abrir o Vsy Converter junto com o Windows** no cartão de destino. A opção usa a inicialização do usuário atual, sem pedir permissões de administrador, e pode ser desmarcada a qualquer momento.
 
 ## Tecnologias
 

@@ -174,6 +174,7 @@ def build_ui(app, discord_class, cut_class, formats, fps_values):
     app.destination_entry.pack(side="left", fill="x", expand=True)
     app.destination_entry.bind("<FocusOut>", lambda e: app._save_current_destination())
     ttk.Button(dest, text="Escolher pasta", command=app.choose_output).pack(side="right", padx=(10, 0))
+    ttk.Checkbutton(dest, text="Abrir o Vsy Converter junto com o Windows", variable=app.startup_enabled, command=app.toggle_startup).pack(anchor="w", pady=(12, 0))
     bottom = ttk.Frame(host, padding=(24, 12, 36, 18))
     scroll.pack_forget()
     bottom.pack(side='bottom', fill='x')
