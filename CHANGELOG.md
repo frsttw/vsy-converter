@@ -1,5 +1,10 @@
 # Histórico de versões
 
+## 2.8.1
+
+- Atalho do aplicativo corrigido para aparecer somente no menu Iniciar.
+- Removida a criação do atalho na Área de Trabalho.
+
 ## 2.8.0
 
 - Nova aba **Cortes** para vídeo, áudio e GIF.

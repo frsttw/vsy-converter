@@ -1,5 +1,5 @@
 #define MyAppName "Vsy Converter"
-#define MyAppVersion "2.8.0"
+#define MyAppVersion "2.8.1"
 #define MyAppPublisher "frsttw"
 #define MyAppExeName "Vsy Converter.exe"
 
@@ -38,10 +38,6 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
-
-[Tasks]
-Name: "desktopicon"; Description: "Criar um atalho na Área de Trabalho"; GroupDescription: "Atalhos:"; Flags: checkedonce
 
 [Run]
 Filename: "{tmp}\ImageMagick-installer.exe"; Parameters: "/VERYSILENT /NORESTART /SP-"; StatusMsg: "Instalando o ImageMagick..."; Flags: waituntilterminated; Check: not ImageMagickInstalled
@@ -52,6 +48,7 @@ Type: files; Name: "{app}\Conversor de Imagens.exe"
 Type: files; Name: "{app}\VS Conversor.exe"
 Type: files; Name: "{autodesktop}\VS Conversor.lnk"
 Type: files; Name: "{autoprograms}\VS Conversor.lnk"
+Type: files; Name: "{autodesktop}\Vsy Converter.lnk"
 
 [Code]
 function ImageMagickInstalled: Boolean;

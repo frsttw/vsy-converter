@@ -4,7 +4,7 @@
   <p><strong>Conversão de imagens simples, rápida e sem terminal.</strong></p>
 
   ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-6d3cff?style=for-the-badge&logo=windows11&logoColor=white)
-  ![Versão](https://img.shields.io/badge/versão-2.8.0-b05cff?style=for-the-badge)
+  ![Versão](https://img.shields.io/badge/versão-2.8.1-b05cff?style=for-the-badge)
   ![ImageMagick](https://img.shields.io/badge/ImageMagick-7.1-8a4fff?style=for-the-badge)
 
   <br><br>
@@ -95,7 +95,7 @@ As metas são margens conservadoras do aplicativo, não uma promessa de aceitaç
 
 ## Instalação
 
-Baixe `Instalador-Vsy-Converter.exe` na seção **Releases** e siga o assistente. O pacote inclui ImageMagick e FFmpeg e cria um atalho na Área de Trabalho.
+Baixe `Instalador-Vsy-Converter.exe` na seção **Releases** e siga o assistente. O pacote inclui ImageMagick e FFmpeg e cria um atalho somente no menu Iniciar.
 
 As preferências de pasta e FPS das versões anteriores são preservadas na atualização.
 
