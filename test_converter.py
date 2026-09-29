@@ -48,7 +48,7 @@ class ConverterTests(unittest.TestCase):
 
     def test_video_60fps(self):
         if not self.app.ffmpeg:
-            self.skipTest('FFmpeg não instalado')
+            self.skipTest('FFmpeg is not installed')
         source = self.directory / 'video.mp4'
         run_command([self.app.ffmpeg, '-loglevel', 'error', '-f', 'lavfi', '-i',
                      'testsrc2=size=160x90:rate=60:duration=1', '-y', str(source)], threading.Event())

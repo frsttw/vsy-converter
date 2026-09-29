@@ -1,4 +1,4 @@
-"""Exportação local de imagens para perfis do Discord."""
+"""Local image export for Discord profiles."""
 from dataclasses import dataclass
 from pathlib import Path
 import os
@@ -18,10 +18,10 @@ class Preset:
     max_bytes: int
 
 
-# Margens de exportação, não limites contratuais da plataforma.
+# Export margins, not contractual platform limits.
 PRESETS = {
     "avatar": Preset("Avatar", 512, 512, 7_500_000),
-    "banner": Preset("Capa de perfil", 680, 240, 9_500_000),
+    "banner": Preset("Profile banner", 680, 240, 9_500_000),
 }
 IMAGE_PATTERNS = "*.png *.jpg *.jpeg *.gif *.webp *.avif *.bmp *.tif *.tiff *.heic *.heif *.svg *.ico *.psd"
 
@@ -32,27 +32,27 @@ class Cancelled(Exception):
 
 def run_command(command, cancelled, on_tick=None):
     if cancelled.is_set():
-        raise Cancelled("Conversão cancelada.")
+        raise Cancelled("Conversion cancelled.")
     with tempfile.TemporaryFile() as log:
         process = subprocess.Popen(command, stdout=log, stderr=log,
                                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         try:
             started = time.monotonic()
-            for _ in range(2400):  # limite de dez minutos por tentativa
+            for _ in range(2400):  # ten-minute limit per attempt
                 try:
                     code = process.wait(timeout=0.25)
                     break
                 except subprocess.TimeoutExpired:
                     if cancelled.is_set():
-                        raise Cancelled("Conversão cancelada.")
+                        raise Cancelled("Conversion cancelled.")
                     if on_tick:
                         on_tick(time.monotonic() - started)
             else:
-                raise RuntimeError("Tempo limite excedido. Tente um GIF mais curto.")
+                raise RuntimeError("Time limit exceeded. Try a shorter GIF.")
             log.seek(0)
             output = log.read().decode("utf-8", errors="replace")
             if code != 0:
-                raise RuntimeError(output[-1400:] or "Não foi possível ler ou converter a imagem.")
+                raise RuntimeError(output[-1400:] or "The image could not be read or converted.")
             return output
         finally:
             if process.poll() is None:
@@ -70,19 +70,19 @@ def find_video_engine():
 
 def encode_gif(ffmpeg, source, candidate, width, height, fit, colors,
                frames, last_delay, cancelled, progress, percent):
-    """Processa quadros em fluxo: não mantém a animação inteira descompactada."""
+    """Process frames as a stream without unpacking the whole animation."""
     mode = "increase" if fit == "crop" else "decrease"
     geometry = f"scale={width}:{height}:force_original_aspect_ratio={mode}:flags=lanczos,format=rgba"
     geometry += (f",crop={width}:{height}" if fit == "crop" else
                  f",pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:color=0x00000000")
     palette = candidate.with_suffix('.palette.png')
     percent(-1)
-    progress(f"Analisando cores · {width}×{height} · {colors} cores...")
+    progress(f"Analyzing colors · {width}×{height} · {colors} colors...")
     run_command([ffmpeg, '-hide_banner', '-loglevel', 'error', '-nostdin', '-y',
                  '-ignore_loop', '1', '-min_delay', '0', '-i', str(source),
                  '-vf', geometry + f',palettegen=max_colors={colors}',
                  '-frames:v', '1', str(palette)], cancelled,
-                lambda elapsed: progress(f"Analisando cores · {elapsed:.0f}s"))
+                lambda elapsed: progress(f"Analyzing colors · {elapsed:.0f}s"))
     graph = f"[0:v]{geometry},setsar=1[v];[v][1:v]paletteuse=dither=none"
     stats = candidate.with_suffix(".progress")
     stats.write_text("", encoding="utf-8")
@@ -91,7 +91,7 @@ def encode_gif(ffmpeg, source, candidate, width, height, fit, colors,
                "-i", str(palette), "-filter_complex_threads", "2", "-filter_complex", graph,
                "-fps_mode", "passthrough", "-final_delay", str(last_delay),
                "-loop", "0", "-progress", str(stats), "-stats_period", "0.25", str(candidate)]
-    prefix = f"{width}×{height} · {colors} cores"
+    prefix = f"{width}×{height} · {colors} colors"
     last = [-1]
     def tick(elapsed):
         try:
@@ -103,7 +103,7 @@ def encode_gif(ffmpeg, source, candidate, width, height, fit, colors,
         if frame != last[0]:
             last[0] = frame
             percent(min(99, 100 * frame / max(1, frames)))
-            progress(f"{prefix} · quadro {min(frame, frames)}/{frames} · {elapsed:.0f}s")
+            progress(f"{prefix} · frame {min(frame, frames)}/{frames} · {elapsed:.0f}s")
     percent(0)
     run_command(command, cancelled, tick)
     percent(100)
@@ -117,9 +117,9 @@ def convert_image(magick, source, directory, kind, fit, output_format,
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     if fit not in {"crop", "contain"} or output_format not in {"AUTO", "PNG", "JPG", "GIF"}:
-        raise ValueError("Opções de exportação inválidas.")
+        raise ValueError("Invalid export options.")
     base = [str(magick), "-limit", "memory", "256MiB", "-limit", "map", "512MiB"]
-    progress("Lendo a imagem e os quadros...")
+    progress("Reading image and frames...")
     info = run_command([str(magick), "identify", "-ping", "-format", "%m %T\n", str(source)], cancelled)
     frames = len(info.strip().splitlines())
     animated = frames > 1
@@ -134,7 +134,7 @@ def convert_image(magick, source, directory, kind, fit, output_format,
         candidate = Path(temp) / ("resultado." + ext)
         for width, height in sizes:
             for level in colors:
-                progress(f"Otimizando {width}×{height} • {'qualidade' if ext == 'jpg' else 'cores'} {level}...")
+                progress(f"Optimizing {width}×{height} • {'quality' if ext == 'jpg' else 'colors'} {level}...")
                 read_path = str(source) if ext == "gif" else str(source) + "[0]"
                 command = base + [read_path]
                 if ext == "gif":
@@ -155,23 +155,23 @@ def convert_image(magick, source, directory, kind, fit, output_format,
                                frames, last_delay, cancelled, progress, percent)
                 else:
                     run_command(command, cancelled,
-                                lambda elapsed: progress(f"Otimizando {width}×{height} · {elapsed:.0f}s"))
+                                lambda elapsed: progress(f"Optimizing {width}×{height} · {elapsed:.0f}s"))
                 size = candidate.stat().st_size
                 progress(f"Verificando {size / 1_000_000:.2f} MB (meta < {preset.max_bytes / 1_000_000:g} MB)...")
                 if 0 < size < preset.max_bytes:
                     dimensions = run_command([str(magick), "identify", "-ping", "-format", "%W %H\n" if ext == 'gif' else "%w %h\n", str(candidate)], cancelled)
                     if any(line != f"{width} {height}" for line in dimensions.strip().splitlines()):
-                        raise RuntimeError("A validação de dimensões falhou. Nenhum arquivo foi publicado.")
+                        raise RuntimeError("Dimension validation failed. No file was published.")
                     if ext == 'gif' and len(dimensions.strip().splitlines()) != frames:
-                        raise RuntimeError('A validação dos quadros falhou. Nenhum arquivo foi publicado.')
+                        raise RuntimeError('Frame validation failed. No file was published.')
                     if cancelled.is_set():
-                        raise Cancelled("Conversão cancelada.")
+                        raise Cancelled("Conversion cancelled.")
                     stem = f"{source.stem}-discord-{kind}"
                     number = 1
                     while True:
                         target = directory / (stem + (f" ({number})" if number > 1 else "") + "." + ext)
                         try:
-                            # Windows: rename falha se o destino existir, sem sobrescrever.
+                            # Windows rename fails when the destination exists, without overwriting it.
                             if target.exists():
                                 number += 1
                                 continue
@@ -179,6 +179,6 @@ def convert_image(magick, source, directory, kind, fit, output_format,
                             break
                         except FileExistsError:
                             number += 1
-                    note = " • primeiro quadro (imagem estática)" if animated and ext != "gif" else ""
+                    note = " • first frame (static image)" if animated and ext != "gif" else ""
                     return target, f"{width}×{height} • {size / 1_000_000:.2f} MB • {ext.upper()}{note}"
-    raise RuntimeError(f"O arquivo continua acima da margem de tamanho: {size / 1_000_000:.2f} MB, para uma meta abaixo de {preset.max_bytes / 1_000_000:g} MB.\nUse um GIF mais curto ou escolha PNG/JPG para salvar apenas o primeiro quadro. O original foi preservado.")
+    raise RuntimeError(f"The file remains above the size margin: {size / 1_000_000:.2f} MB, with a target below {preset.max_bytes / 1_000_000:g} MB.\nUse a shorter GIF or choose PNG/JPG to save only the first frame. The original was preserved.")

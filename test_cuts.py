@@ -18,7 +18,7 @@ class CutMediaTests(unittest.TestCase):
         self.ffmpeg = find_ffmpeg()
         self.magick = find_magick()
         if not self.ffmpeg or not self.magick:
-            self.skipTest("ImageMagick e FFmpeg são necessários")
+            self.skipTest("ImageMagick and FFmpeg are required")
 
     def test_parse_timecode(self):
         self.assertEqual(parse_timecode("12.5"), 12.5)
@@ -34,7 +34,7 @@ class CutMediaTests(unittest.TestCase):
         original = source.read_bytes()
         result, summary = cut_media(self.ffmpeg, source, self.directory, "trecho", 0.5, 1.5)
         self.assertEqual(result.suffix, ".mp4")
-        self.assertIn("sem recompressão", summary)
+        self.assertIn("without recompression", summary)
         self.assertTrue(result.is_file())
         self.assertEqual(source.read_bytes(), original)
 
@@ -44,14 +44,14 @@ class CutMediaTests(unittest.TestCase):
                      "-i", "sine=frequency=440:duration=2", "-c:a", "pcm_s16le", "-y", str(audio)], threading.Event())
         audio_cut, audio_summary = cut_media(self.ffmpeg, audio, self.directory, "som", 0.25, 1.25)
         self.assertEqual(audio_cut.suffix, ".wav")
-        self.assertIn("sem recompressão", audio_summary)
+        self.assertIn("without recompression", audio_summary)
 
         gif = self.directory / "animado.gif"
         run_command([self.magick, "-delay", "10", "-size", "80x40", "xc:red",
                      "-delay", "10", "-size", "80x40", "xc:blue", "-loop", "0", str(gif)], threading.Event())
         gif_cut, gif_summary = cut_media(self.ffmpeg, gif, self.directory, "gif-corte", 0, 0.2)
         self.assertEqual(gif_cut.suffix, ".gif")
-        self.assertIn("GIF recodificado", gif_summary)
+        self.assertIn("GIF re-encoded", gif_summary)
         self.assertTrue(gif_cut.is_file())
 
     def test_invalid_range_does_not_publish(self):

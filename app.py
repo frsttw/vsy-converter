@@ -32,10 +32,10 @@ FORMAT_CATEGORIES = {
     "PDF": "documentos",
 }
 FILE_TYPES = [
-    ("Todos os formatos compatíveis", "*.jpg *.jpeg *.jpe *.jfif *.png *.apng *.webp *.avif *.gif *.bmp *.dib *.tif *.tiff *.ico *.heic *.heif *.svg *.psd *.xcf *.ppm *.pgm *.pbm *.pnm *.tga *.dds *.dng *.cr2 *.cr3 *.nef *.arw *.orf *.rw2 *.raf *.pdf *.mp4 *.m4v *.mkv *.mov *.avi *.webm *.wmv *.flv *.f4v *.mpeg *.mpg *.mpe *.mpv *.mts *.m2ts *.ts *.vob *.ogv *.ogg *.3gp *.3g2 *.asf *.rm *.rmvb *.divx *.xvid *.mxf *.dv *.qt *.y4m *.amv *.mjpeg *.mjpg *.nut"),
-    ("Todos os vídeos", "*.mp4 *.m4v *.mkv *.mov *.avi *.webm *.wmv *.flv *.f4v *.mpeg *.mpg *.mpe *.mpv *.mts *.m2ts *.ts *.vob *.ogv *.ogg *.3gp *.3g2 *.asf *.rm *.rmvb *.divx *.xvid *.mxf *.dv *.qt *.y4m *.amv *.mjpeg *.mjpg *.nut"),
-    ("Todas as imagens", "*.jpg *.jpeg *.jpe *.jfif *.png *.apng *.webp *.avif *.gif *.bmp *.dib *.tif *.tiff *.ico *.heic *.heif *.svg *.psd *.xcf *.ppm *.pgm *.pbm *.pnm *.tga *.dds *.dng *.cr2 *.cr3 *.nef *.arw *.orf *.rw2 *.raf"),
-    ("Todos os arquivos", "*.*"),
+    ("All supported formats", "*.jpg *.jpeg *.jpe *.jfif *.png *.apng *.webp *.avif *.gif *.bmp *.dib *.tif *.tiff *.ico *.heic *.heif *.svg *.psd *.xcf *.ppm *.pgm *.pbm *.pnm *.tga *.dds *.dng *.cr2 *.cr3 *.nef *.arw *.orf *.rw2 *.raf *.pdf *.mp4 *.m4v *.mkv *.mov *.avi *.webm *.wmv *.flv *.f4v *.mpeg *.mpg *.mpe *.mpv *.mts *.m2ts *.ts *.vob *.ogv *.ogg *.3gp *.3g2 *.asf *.rm *.rmvb *.divx *.xvid *.mxf *.dv *.qt *.y4m *.amv *.mjpeg *.mjpg *.nut"),
+    ("All videos", "*.mp4 *.m4v *.mkv *.mov *.avi *.webm *.wmv *.flv *.f4v *.mpeg *.mpg *.mpe *.mpv *.mts *.m2ts *.ts *.vob *.ogv *.ogg *.3gp *.3g2 *.asf *.rm *.rmvb *.divx *.xvid *.mxf *.dv *.qt *.y4m *.amv *.mjpeg *.mjpg *.nut"),
+    ("All images", "*.jpg *.jpeg *.jpe *.jfif *.png *.apng *.webp *.avif *.gif *.bmp *.dib *.tif *.tiff *.ico *.heic *.heif *.svg *.psd *.xcf *.ppm *.pgm *.pbm *.pnm *.tga *.dds *.dng *.cr2 *.cr3 *.nef *.arw *.orf *.rw2 *.raf"),
+    ("All files", "*.*"),
 ]
 VIDEO_EXTENSIONS = {
     ".mp4", ".m4v", ".mkv", ".mov", ".avi", ".webm", ".wmv", ".flv", ".f4v",
@@ -73,8 +73,10 @@ class ConverterApp(tk.Tk):
         self.files: list[Path] = []
         self.magick = find_magick()
         self.ffmpeg = find_ffmpeg()
-        self.config_dir = Path(os.environ.get("LOCALAPPDATA", Path.home())) / "VS Conversor"
-        self.config_file = self.config_dir / "preferencias.json"
+        local_appdata = Path(os.environ.get("LOCALAPPDATA", Path.home()))
+        self.config_dir = local_appdata / "Vsy Converter"
+        self.legacy_config_file = local_appdata / "VS Conversor" / "preferencias.json"
+        self.config_file = self.config_dir / "preferences.json"
         self.preferences = self._load_preferences()
         self.output_format = tk.StringVar(value="JPG")
         self._active_category = self._current_category()
@@ -85,12 +87,12 @@ class ConverterApp(tk.Tk):
         self.width = tk.StringVar()
         self.height = tk.StringVar()
         self.keep_metadata = tk.BooleanVar(value=True)
-        self.status = tk.StringVar(value="Pronto para converter.")
+        self.status = tk.StringVar(value="Ready to convert.")
         self._build_ui()
         self.poll_id = self.after(150, self._poll_conversion)
         self.protocol("WM_DELETE_WINDOW", self._close)
         if not self.magick:
-            self.after(200, lambda: messagebox.showerror(APP_NAME, "ImageMagick não foi encontrado. Reinstale-o e abra o aplicativo novamente."))
+            self.after(200, lambda: messagebox.showerror(APP_NAME, "ImageMagick was not found. Reinstall it and open the app again."))
 
     def _build_ui(self) -> None:
         from ui_layout import build_ui
@@ -98,7 +100,7 @@ class ConverterApp(tk.Tk):
 
     def _close(self):
         if self.discord_tab.busy or self.cut_tab.busy or self.conversion_busy:
-            if messagebox.askyesno(APP_NAME, "Cancelar a conversão em andamento e fechar?"):
+            if messagebox.askyesno(APP_NAME, "Cancel the conversion in progress and close?"):
                 self.discord_tab.cancelled.set()
                 self.cut_tab.cancelled.set()
                 self.cancelled.set()
@@ -132,30 +134,32 @@ class ConverterApp(tk.Tk):
 
     def _load_preferences(self) -> dict:
         try:
-            data = json.loads(self.config_file.read_text(encoding="utf-8"))
+            source = self.config_file if self.config_file.is_file() else self.legacy_config_file
+            data = json.loads(source.read_text(encoding="utf-8"))
             return data if isinstance(data, dict) else {}
         except (OSError, ValueError, TypeError):
             return {}
 
     def _saved_output_dir(self, category: str) -> str:
-        saved = self.preferences.get("pastas_destino", {}).get(category)
+        folders = self.preferences.get("destination_folders") or self.preferences.get("pastas_destino", {})
+        saved = folders.get(category) if isinstance(folders, dict) else None
         if isinstance(saved, str) and saved.strip():
             return saved
         if category == "documentos":
-            return str(Path.home() / "Documents" / "Documentos convertidos")
+            return str(Path.home() / "Documents" / "Converted documents")
         if category == "videos":
-            return str(Path.home() / "Videos" / "GIFs convertidos")
+            return str(Path.home() / "Videos" / "Converted GIFs")
         if category == "cortes":
-            return str(Path.home() / "Videos" / "Cortes")
+            return str(Path.home() / "Videos" / "Cuts")
         if category.startswith("discord_"):
-            return str(Path.home() / "Pictures" / "Discord" / ("Avatares" if category == "discord_avatar" else "Capas"))
-        return str(Path.home() / "Pictures" / "Imagens convertidas")
+            return str(Path.home() / "Pictures" / "Discord" / ("Avatars" if category == "discord_avatar" else "Banners"))
+        return str(Path.home() / "Pictures" / "Converted images")
 
     def _save_current_destination(self) -> None:
         destination = self.output_dir.get().strip()
         if not destination:
             return
-        folders = self.preferences.setdefault("pastas_destino", {})
+        folders = self.preferences.setdefault("destination_folders", {})
         folders[self._active_category] = destination
         try:
             self.config_dir.mkdir(parents=True, exist_ok=True)
@@ -189,7 +193,7 @@ class ConverterApp(tk.Tk):
         self.height_entry.configure(state=state)
 
     def add_files(self) -> None:
-        selected = filedialog.askopenfilenames(title="Escolha os arquivos", filetypes=FILE_TYPES)
+        selected = filedialog.askopenfilenames(title="Choose files", filetypes=FILE_TYPES)
         known = {str(p).lower() for p in self.files}
         for item in selected:
             if item.lower() not in known:
@@ -213,10 +217,10 @@ class ConverterApp(tk.Tk):
         self.file_list.delete(0, "end")
         for path in self.files:
             self.file_list.insert("end", str(path))
-        self.file_count.configure(text=f"{len(self.files)} arquivo{'s' if len(self.files) != 1 else ''}")
+        self.file_count.configure(text=f"{len(self.files)} file{'s' if len(self.files) != 1 else ''}")
 
     def choose_output(self) -> None:
-        selected = filedialog.askdirectory(title="Escolha a pasta de destino", initialdir=self.output_dir.get())
+        selected = filedialog.askdirectory(title="Choose the destination folder", initialdir=self.output_dir.get())
         if selected:
             self.output_dir.set(selected)
             self._save_current_destination()
@@ -226,28 +230,28 @@ class ConverterApp(tk.Tk):
             return None
         width, height = self.width.get().strip(), self.height.get().strip()
         if not width and not height:
-            raise ValueError("Informe a largura, a altura ou as duas.")
+            raise ValueError("Enter a width, a height, or both.")
         if (width and not width.isdigit()) or (height and not height.isdigit()):
-            raise ValueError("Largura e altura precisam ser números inteiros.")
+            raise ValueError("Width and height must be whole numbers.")
         if (width and int(width) < 1) or (height and int(height) < 1):
-            raise ValueError("Largura e altura precisam ser maiores que zero.")
+            raise ValueError("Width and height must be greater than zero.")
         return f"{width}x{height}"
 
     def start_conversion(self) -> None:
         if self.conversion_busy:
             return
         if not self.magick:
-            messagebox.showerror(APP_NAME, "ImageMagick não foi encontrado.")
+            messagebox.showerror(APP_NAME, "ImageMagick was not found.")
             return
         if not self.files:
-            messagebox.showinfo(APP_NAME, "Adicione pelo menos um arquivo para converter.")
+            messagebox.showinfo(APP_NAME, "Add at least one file to convert.")
             return
         has_video = any(path.suffix.lower() in VIDEO_EXTENSIONS for path in self.files)
         if has_video and self.output_format.get().upper() != "GIF":
-            messagebox.showwarning(APP_NAME, "Vídeos podem ser convertidos para GIF. Selecione GIF como formato de saída.")
+            messagebox.showwarning(APP_NAME, "Videos can be converted to GIF. Select GIF as the output format.")
             return
         if has_video and not self.ffmpeg:
-            messagebox.showerror(APP_NAME, "O componente FFmpeg não foi encontrado. Reinstale o Vsy Converter.")
+            messagebox.showerror(APP_NAME, "The FFmpeg component was not found. Reinstall Vsy Converter.")
             return
         try:
             geometry = self._resize_geometry()
@@ -255,7 +259,7 @@ class ConverterApp(tk.Tk):
             messagebox.showwarning(APP_NAME, str(exc))
             return
         if not self.output_dir.get().strip():
-            messagebox.showwarning(APP_NAME, "Escolha uma pasta de destino.")
+            messagebox.showwarning(APP_NAME, "Choose a destination folder.")
             return
         destination = Path(self.output_dir.get().strip())
         self._save_current_destination()
@@ -266,7 +270,7 @@ class ConverterApp(tk.Tk):
         lock_controls(self.converter_content, True)
         self.progress.configure(mode='indeterminate', value=0)
         self.progress.start(12)
-        self.status.set("Iniciando...")
+        self.status.set("Starting...")
         self._save_gif_fps()
         settings = (self.output_format.get().lower(), str(round(self.quality.get())), self.keep_metadata.get(), int(self.gif_fps.get()))
         threading.Thread(target=self._convert_all, args=(destination, geometry, settings, tuple(self.files)), daemon=True).start()
@@ -282,7 +286,7 @@ class ConverterApp(tk.Tk):
 
     def cancel_conversion(self):
         self.cancelled.set()
-        self.status.set("Cancelando… Os arquivos originais serão preservados.")
+        self.status.set("Cancelling… Original files will be preserved.")
 
     def _convert_all(self, destination, geometry, settings, sources):
         errors = []
@@ -293,7 +297,7 @@ class ConverterApp(tk.Tk):
             for index, source in enumerate(sources, 1):
                 if self.cancelled.is_set():
                     raise Cancelled()
-                prefix = f"Arquivo {index}/{len(sources)} · {source.name}"
+                prefix = f"File {index}/{len(sources)} · {source.name}"
                 self.events.put(("status", prefix))
                 with tempfile.TemporaryDirectory(prefix='.vsy-convert-', dir=destination) as temp:
                     output = Path(temp) / ("resultado." + extension)
@@ -326,11 +330,11 @@ class ConverterApp(tk.Tk):
                             raise Cancelled()
                         generated = sorted(Path(temp).glob('resultado*.' + extension))
                         if not generated:
-                            raise RuntimeError('O conversor não gerou um arquivo de saída.')
+                            raise RuntimeError('The converter did not generate an output file.')
                         for item in generated:
                             stem = source.stem if len(generated) == 1 else source.stem + item.stem.removeprefix('resultado')
                             target = self._unique_output(destination, stem, extension)
-                            # No Windows rename nunca substitui um arquivo existente.
+                            # On Windows, rename never replaces an existing file.
                             while True:
                                 try:
                                     item.rename(target)
@@ -366,13 +370,13 @@ class ConverterApp(tk.Tk):
         self.convert_button.configure(state='normal')
         self.cancel_button.configure(state='disabled')
         if cancelled:
-            self.status.set(f'Cancelado · {converted} arquivo(s) concluído(s). Originais preservados.')
+            self.status.set(f'Cancelled · {converted} file(s) completed. Originals preserved.')
         elif errors:
-            self.status.set(f'Concluído · {converted} convertido(s), {len(errors)} erro(s).')
+            self.status.set(f'Completed · {converted} converted, {len(errors)} error(s).')
             messagebox.showwarning(APP_NAME, '\n\n'.join(errors[:5]))
         else:
-            self.status.set(f'Pronto! {converted} arquivo(s) convertido(s).')
-            if messagebox.askyesno(APP_NAME, 'Conversão concluída!\n\nAbrir a pasta de destino?'):
+            self.status.set(f'Done! {converted} file(s) converted.')
+            if messagebox.askyesno(APP_NAME, 'Conversion completed!\n\nOpen the destination folder?'):
                 os.startfile(destination)
 
 

@@ -1,143 +1,127 @@
 <div align="center">
   <img src="docs/banner.png" alt="Vsy Converter" width="100%">
 
-  <p><strong>Conversão de imagens simples, rápida e sem terminal.</strong></p>
+  <p><strong>Simple, fast image conversion without a terminal.</strong></p>
 
   ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-6d3cff?style=for-the-badge&logo=windows11&logoColor=white)
-  ![Versão](https://img.shields.io/badge/versão-2.8.2-b05cff?style=for-the-badge)
+  ![Version](https://img.shields.io/badge/version-2.9.0-b05cff?style=for-the-badge)
   ![ImageMagick](https://img.shields.io/badge/ImageMagick-7.1-8a4fff?style=for-the-badge)
 
   <br><br>
   <a href="https://github.com/frsttw/vsy-converter/releases/latest/download/Instalador-Vsy-Converter.exe">
-    <img src="https://img.shields.io/badge/BAIXAR%20PARA%20WINDOWS-9f50e8?style=for-the-badge&logo=windows11&logoColor=white" alt="Baixar Vsy Converter">
+    <img src="https://img.shields.io/badge/DOWNLOAD%20FOR%20WINDOWS-9f50e8?style=for-the-badge&logo=windows11&logoColor=white" alt="Download Vsy Converter">
   </a>
 </div>
 
-## Sobre
+## About
 
-O **Vsy Converter** oferece uma interface gráfica para o ImageMagick e o FFmpeg. Converta imagens, transforme vídeos em GIF e corte mídias sem memorizar comandos ou abrir o terminal.
+**Vsy Converter** provides a graphical interface for ImageMagick and FFmpeg. Convert images, turn videos into GIFs, and cut media without memorizing commands or opening a terminal.
 
-## Destaques
+## Highlights
 
-- Conversão de vários arquivos em uma única operação.
-- Suporte a JPG, PNG, WebP, AVIF, GIF, BMP, TIFF, ICO e PDF.
-- Controle de qualidade com resultado visível e previsível.
-- Redimensionamento com preservação automática da proporção.
-- Opção para manter ou remover metadados.
-- Proteção dos arquivos originais e numeração automática de nomes repetidos.
-- Memória automática da pasta de destino para cada tipo de saída.
-- Conversão para GIF de formatos de vídeo modernos, antigos, profissionais e de celular suportados pelo FFmpeg.
-- Controle de fluidez do GIF entre 10 e 60 FPS, com preferência memorizada.
-- Interface em grafite e violeta, com navegação no topo e opções organizadas em cartões.
-- Ações sempre acessíveis, rolagem em janelas menores e cancelamento nas duas áreas.
-- Aba Cortes para vídeo, áudio e GIF, com início/fim e saída no formato original.
-- Vídeo e áudio são cortados por cópia direta dos fluxos, sem recompressão ou perda de qualidade.
-- Instalador completo com o ImageMagick incluído.
+- Convert multiple files in one operation.
+- Support for JPG, PNG, WebP, AVIF, GIF, BMP, TIFF, ICO, and PDF.
+- Quality controls with visible, predictable results.
+- Resize images while preserving the aspect ratio automatically.
+- Option to keep or remove metadata.
+- Original-file protection with automatic numbering for duplicate names.
+- Destination folders remembered separately for each output type.
+- Convert modern, legacy, professional, and mobile video formats supported by FFmpeg to GIF.
+- GIF frame-rate control from 10 to 60 FPS, with the preference remembered.
+- Graphite and violet interface with top navigation and organized cards.
+- Actions remain accessible on smaller windows, with cancellation in every area.
+- **Cuts** tab for video, audio, and GIF files with start/end controls and original-format output.
+- Video and audio cuts use direct stream copy without recompression or quality loss.
+- Complete installer with ImageMagick included.
 
-## Como usar
+## How to use
 
-1. Adicione uma ou mais imagens.
-2. Escolha o formato de saída e a qualidade.
-3. Se desejar, ative o redimensionamento.
-4. Selecione a pasta de destino.
-5. Pressione **Converter arquivos**.
+1. Add one or more images.
+2. Choose the output format and quality.
+3. Enable resizing if needed.
+4. Select a destination folder.
+5. Click **Convert files**.
 
 ## Interface
 
-![Conversor com navegação superior, cartões e tema escuro](docs/interface.png)
+![Converter with top navigation, cards, and dark theme](docs/interface.png)
 
-### Novidades da versão 2.6
+### Discord workspace
 
-- Novo layout para o conversor e a área Discord, mantendo a identidade violeta.
-- GIFs na área Discord usam uma paleta global em duas passagens de leitura sequencial pelo FFmpeg, evitando armazenar todos os quadros descompactados de uma vez.
-- Durante a codificação, o progresso mostra o quadro atual, o total e o tempo da etapa. A análise de cores tem indicador de atividade próprio.
-- Exportações acima da meta informam o tamanho obtido, sem salvar um resultado inadequado.
-- Conversão geral com cancelamento, arquivos temporários e configurações protegidas durante o processamento.
-- Crédito visual discreto para o site pessoal `frstt.dev` no cabeçalho do aplicativo.
-- Opção para abrir automaticamente com o Windows, visível nas configurações de inicialização do usuário.
+![Avatar and profile-banner preparation](docs/discord.png)
 
-O tempo de exportação depende da duração, resolução e conteúdo da animação. Se uma tentativa ultrapassar a meta, o app tenta menos cores. Não corta a duração nem reduz os quadros automaticamente.
+- Square 512×512 px avatars or 680×240 px profile banners.
+- Center crop or full fit with margins, without distortion.
+- AUTO keeps animations as GIF; PNG/JPG export only the first frame.
+- Progressive optimization and actual-size validation, targeting below 7.5 MB for avatars and 9.5 MB for banners.
+- GIFs preserve frames and duration; they may lose colors and avatar resolution (down to 128×128).
+- If the target cannot be met, no oversized result is saved. Use a shorter clip or a static output.
+- Independent folders and cancellation are remembered for avatars and banners.
 
-## Formatos
+### Cuts workspace
 
-### Aba Discord
+![Video, audio, and GIF cutting](docs/cuts.png)
 
-![Preparação de avatar e capa de perfil](docs/discord.png)
+- Choose a start and end in seconds or `HH:MM:SS.000`; leave the end empty to use the end of the file.
+- Videos and audio keep their streams, tracks, metadata, and format without recompression.
+- Direct stream copy may align a start to the nearest keyframe in some videos; this avoids re-encoding and preserves original quality.
+- GIFs are re-encoded only because cutting must remove frames, while preserving resolution, duration, and animation.
+- The cuts folder is remembered separately and original files are never overwritten.
 
-- Avatar quadrado de 512×512 px ou capa de perfil de 680×240 px.
-- Recorte central ou ajuste completo com margens, sem distorção.
-- AUTO mantém animações como GIF; PNG/JPG exportam o primeiro quadro.
-- Otimização gradual e verificação do peso real: meta inferior a 7,5 MB para avatar e 9,5 MB para capa.
-- GIFs preservam quadros e duração; podem perder cores e, no avatar, resolução (até 128×128).
-- Se não couber, nenhum resultado acima da meta é salvo. Use um trecho menor ou saída estática.
-- Cancelamento e pastas independentes memorizadas para avatar e capa.
+The targets are conservative application margins, not a promise of Discord acceptance. Custom banners and animated avatars depend on Nitro. This tab does not configure server banners or upload files automatically.
 
-### Aba Cortes
+| Type | Input | Output |
+| --- | --- | --- |
+| Images | JPG, PNG, WebP, AVIF, GIF, BMP, TIFF, HEIC, SVG, PSD, RAW, and other supported formats | JPG, PNG, WebP, AVIF, GIF, BMP, TIFF, ICO, and PDF |
+| Video | MP4, MKV, MOV, AVI, WebM, WMV, MPEG, MTS, VOB, 3GP, and other FFmpeg formats | GIF from 10 to 60 FPS |
 
-![Corte de vídeo, áudio e GIF](docs/cortes.png)
+> Availability of special image formats depends on the codecs included with ImageMagick. Videos are validated directly by FFmpeg.
 
-- Escolha início e fim em segundos ou `HH:MM:SS.000`; deixe o fim vazio para usar até o final.
-- Vídeos e áudios mantêm seus fluxos, faixas, metadados e formato, sem recompressão.
-- Em alguns vídeos, a cópia direta pode alinhar o início ao keyframe mais próximo; isso evita reencodar e preservar a qualidade original.
-- GIFs são recodificados apenas porque o corte precisa remover quadros, mantendo resolução, duração e animação.
-- A pasta de cortes é lembrada separadamente e nenhum arquivo original é sobrescrito.
+## Installation
 
-As metas são margens conservadoras do aplicativo, não uma promessa de aceitação pelo Discord. A documentação de [perfis personalizados](https://support.discord.com/hc/en-us/articles/4403147417623-Custom-Profiles) indica capas PNG/JPG/GIF abaixo de 10 MB e no mínimo 680×240 px (consulta em 26/08/2026). O alvo de avatar é uma escolha conservadora do app; não representa um limite oficial documentado. Capas personalizadas e avatares animados dependem do Nitro. Esta aba não configura banners de servidores nem envia arquivos automaticamente.
+Download `Instalador-Vsy-Converter.exe` from **Releases** and follow the wizard. The package includes ImageMagick and FFmpeg and creates a Start-menu shortcut only; Vsy Converter does not start automatically with Windows.
 
-| Tipo | Entrada | Saída |
-|---|---|---|
-| Imagens | JPG, PNG, WebP, AVIF, GIF, BMP, TIFF, HEIC, SVG, PSD, RAW e outros | JPG, PNG, WebP, AVIF, GIF, BMP, TIFF, ICO e PDF |
-| Vídeos | MP4, MKV, MOV, AVI, WebM, WMV, MPEG, MTS, VOB, 3GP e outros formatos reconhecidos pelo FFmpeg | GIF de 10 a 60 FPS |
+Folder and FPS preferences from previous versions are preserved during upgrades.
 
-> A disponibilidade de formatos especiais de imagem depende dos codecs incluídos no ImageMagick. Os vídeos são validados diretamente pelo FFmpeg.
+## Technologies
 
-> GIF registra os intervalos em centésimos de segundo. A opção 60 FPS distribui os tempos entre quadros; a fluidez exibida também depende do navegador ou aplicativo que reproduz o arquivo.
+- Python and Tkinter for the desktop application.
+- ImageMagick as the conversion engine.
+- FFmpeg for video reading and conversion.
+- PyInstaller for the executable.
+- Inno Setup for the Windows installer.
 
-## Instalação
+License notices and links are available in [`THIRD-PARTY-LICENSES.txt`](THIRD-PARTY-LICENSES.txt).
 
-Baixe `Instalador-Vsy-Converter.exe` na seção **Releases** e siga o assistente. O pacote inclui ImageMagick e FFmpeg e cria um atalho somente no menu Iniciar.
+## Build locally
 
-As preferências de pasta e FPS das versões anteriores são preservadas na atualização.
-
-## Tecnologias
-
-- Python e Tkinter para a aplicação desktop.
-- ImageMagick como mecanismo de conversão.
-- FFmpeg para leitura e conversão de vídeos.
-- PyInstaller para o executável.
-- Inno Setup para o instalador do Windows.
-
-Os avisos e links das licenças estão em [`LICENCAS-DE-TERCEIROS.txt`](LICENCAS-DE-TERCEIROS.txt).
-
-## Construção local
-
-Com Python 3, PyInstaller e Inno Setup 6 instalados, execute:
+With Python 3, PyInstaller, and Inno Setup 6 installed, run:
 
 ```powershell
 .\build-installer.ps1
 ```
 
-O instalador será criado em `installer-output`.
+The installer is created in `installer-output`.
 
-Para executar os testes de conversão e interface, com ImageMagick e FFmpeg disponíveis:
+Run the conversion and interface tests with ImageMagick and FFmpeg available:
 
 ```powershell
 py -m unittest discover -v
 ```
 
-## Estrutura
+## Structure
 
 ```text
-Vsy Converter
-├── app.py                  # Aplicação desktop
-├── assets/                 # Identidade visual e ícone
-├── docs/                   # Materiais da página do projeto
-├── build-installer.ps1     # Automação da compilação
-└── installer.iss           # Configuração do instalador
+Vsy Converter/
+├── app.py                  # Desktop application
+├── assets/                 # Visual identity and icon
+├── docs/                   # Project-page images
+├── build-installer.ps1     # Build automation
+└── installer.iss           # Installer configuration
 ```
 
 ---
 
 <div align="center">
-  Desenvolvido por <a href="https://github.com/frsttw">@frsttw</a> · <a href="https://frstt.dev">frstt.dev</a>
+  Developed by <a href="https://github.com/frsttw">@frsttw</a> · <a href="https://frstt.dev">frstt.dev</a>
 </div>

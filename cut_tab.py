@@ -23,19 +23,19 @@ class CutTab(ttk.Frame):
         self.start_time = tk.StringVar(value="0")
         self.end_time = tk.StringVar(value="")
         self.folder = tk.StringVar(value=app._saved_output_dir("cortes"))
-        self.status = tk.StringVar(value="Escolha um vídeo, áudio ou GIF para começar.")
+        self.status = tk.StringVar(value="Choose a video, audio, or GIF to begin.")
         self.result = None
         build_cut(self)
         self.poll_id = self.after(150, self.poll)
 
     def choose_source(self):
-        path = filedialog.askopenfilename(title="Vídeo, áudio ou GIF", filetypes=[("Mídia compatível", MEDIA_PATTERNS), ("Todos os arquivos", "*.*")])
+        path = filedialog.askopenfilename(title="Video, audio, or GIF", filetypes=[("Supported media", MEDIA_PATTERNS), ("All files", "*.*")])
         if path:
             self.source.set(path)
             self.output_stem.set(Path(path).stem + "-corte")
 
     def choose_folder(self):
-        path = filedialog.askdirectory(title="Pasta para cortes", initialdir=self.folder.get())
+        path = filedialog.askdirectory(title="Cut destination folder", initialdir=self.folder.get())
         if path:
             self.folder.set(path)
             self.save_folder()
@@ -43,22 +43,22 @@ class CutTab(ttk.Frame):
     def save_folder(self):
         value = self.folder.get().strip()
         if value:
-            self.app.preferences.setdefault("pastas_destino", {})["cortes"] = value
+            self.app.preferences.setdefault("destination_folders", {})["cortes"] = value
             self.app._save_gif_fps()
 
     def start(self):
         if self.busy:
             return
         if not self.app.ffmpeg or not Path(self.source.get()).is_file() or not self.folder.get().strip():
-            messagebox.showwarning("Cortes", "Escolha uma mídia e uma pasta de destino; o FFmpeg precisa estar instalado.")
+            messagebox.showwarning("Cuts", "Choose media and a destination folder; FFmpeg must be installed.")
             return
         try:
             start = parse_timecode(self.start_time.get()) or 0.0
             end = parse_timecode(self.end_time.get())
             if end is not None and end <= start:
-                raise ValueError("O fim precisa ser maior que o início.")
+                raise ValueError("The end must be later than the start.")
         except ValueError as exc:
-            messagebox.showwarning("Cortes", str(exc))
+            messagebox.showwarning("Cuts", str(exc))
             return
         self.save_folder()
         args = (self.app.ffmpeg, Path(self.source.get()), Path(self.folder.get().strip()), self.output_stem.get(), start, end)
@@ -71,19 +71,19 @@ class CutTab(ttk.Frame):
         self.cancel_button.configure(state="normal")
         self.progress.configure(mode="indeterminate", value=0)
         self.progress.start(12)
-        self.status.set("Preparando o corte…")
+        self.status.set("Preparing the cut…")
         threading.Thread(target=self.worker, args=(args,), daemon=True).start()
 
     def cancel(self):
         self.cancelled.set()
-        self.status.set("Cancelando… O original será preservado.")
+        self.status.set("Cancelling… The original will be preserved.")
 
     def worker(self, args):
         try:
             result = cut_media(*args, cancelled=self.cancelled, progress=lambda text: self.events.put(("status", text)))
             self.events.put(("done", result))
         except Cancelled:
-            self.events.put(("cancelled", "Cancelado. O original foi preservado."))
+            self.events.put(("cancelled", "Cancelled. The original was preserved."))
         except Exception as exc:
             self.events.put(("error", str(exc)))
 
@@ -101,12 +101,12 @@ class CutTab(ttk.Frame):
             if event == "done":
                 self.result, summary = value
                 self.progress.configure(mode="determinate", maximum=100, value=100)
-                self.status.set(f"Pronto: {self.result.name}\n{summary}")
+                self.status.set(f"Ready: {self.result.name}\n{summary}")
                 self.open_button.configure(state="normal")
             else:
                 self.status.set(value)
                 if event == "error":
-                    messagebox.showerror("Cortes", value)
+                    messagebox.showerror("Cuts", value)
         self.poll_id = self.after(150, self.poll)
 
     def destroy(self):

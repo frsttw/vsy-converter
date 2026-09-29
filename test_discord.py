@@ -14,15 +14,15 @@ from discord_export import convert_image, PRESETS, Cancelled
 
 class DiscordTests(unittest.TestCase):
     def setUp(self):
-        # Recolhe janelas de testes anteriores na thread responsável pelo Tk.
+        # Collect windows from earlier tests on the Tk thread.
         gc.collect()
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.directory = Path(self.temp.name)
         self.magick = find_magick()
         if not self.magick:
-            self.skipTest("ImageMagick não instalado")
-        self.source = self.directory / "imagem teste.png"
+            self.skipTest("ImageMagick is not installed")
+        self.source = self.directory / "test-image.png"
         self.run_magick("-size", "300x120", "xc:red", str(self.source))
 
     def run_magick(self, *args):
@@ -48,13 +48,13 @@ class DiscordTests(unittest.TestCase):
             self.assertEqual(path.suffix, ".gif")
             self.assertEqual(self.run_magick("identify", "-format", "%T\n", str(path)), "10\n20\n")
         path, summary = convert_image(self.magick, gif, self.directory, "avatar", "contain", "PNG")
-        self.assertIn("primeiro quadro", summary)
+        self.assertIn("first frame", summary)
         self.assertEqual(self.run_magick("identify", "-format", "%n", str(path)), "1")
 
     def test_oversized_is_not_published(self):
         destination = self.directory / "saida"
         with patch.dict(PRESETS, {"banner": replace(PRESETS["banner"], max_bytes=1)}):
-            with self.assertRaisesRegex(RuntimeError, "acima da margem"):
+            with self.assertRaisesRegex(RuntimeError, "above the size margin"):
                 convert_image(self.magick, self.source, destination, "banner", "crop", "PNG")
         self.assertEqual(list(destination.iterdir()), [])
 

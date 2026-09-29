@@ -1,4 +1,4 @@
-"""Cortes locais de vídeo, áudio e GIF usando os fluxos originais quando possível."""
+"""Local video, audio, and GIF cuts using original streams when possible."""
 from pathlib import Path
 import os
 import re
@@ -17,7 +17,7 @@ MEDIA_PATTERNS = (
 
 
 def parse_timecode(value):
-    """Converte segundos ou HH:MM:SS(.mmm) em segundos."""
+    """Convert seconds or HH:MM:SS(.mmm) to seconds."""
     text = str(value or "").strip()
     if not text:
         return None
@@ -35,7 +35,7 @@ def parse_timecode(value):
             raise ValueError
         return result
     except (TypeError, ValueError):
-        raise ValueError("Use o tempo em segundos ou no formato HH:MM:SS.000.")
+        raise ValueError("Use seconds or the HH:MM:SS.000 format.")
 
 
 def _time_arg(seconds):
@@ -60,12 +60,12 @@ def _cut_gif(ffmpeg, source, candidate, start, duration, cancelled, progress):
     command += ["-filter_complex", graph, "-fps_mode", "passthrough", "-gifflags", "-offsetting",
                 "-loop", "0", str(candidate)]
     run_command(command, cancelled,
-                lambda elapsed: progress(f"Recodificando GIF… {elapsed:.0f}s"))
+                lambda elapsed: progress(f"Re-encoding GIF… {elapsed:.0f}s"))
 
 
 def cut_media(ffmpeg, source, directory, output_stem, start, end,
               cancelled=None, progress=lambda text: None):
-    """Corta uma mídia sem recompressão; GIF é recodificado para manter a animação."""
+    """Cut media without recompression; GIF is re-encoded to keep animation."""
     cancelled = cancelled or threading.Event()
     source = Path(source).resolve(strict=True)
     directory = Path(directory)
@@ -73,9 +73,9 @@ def cut_media(ffmpeg, source, directory, output_stem, start, end,
     start = parse_timecode(start) or 0.0
     end = parse_timecode(end)
     if end is not None and end <= start:
-        raise ValueError("O fim precisa ser maior que o início.")
+        raise ValueError("The end must be later than the start.")
     if not ffmpeg:
-        raise RuntimeError("FFmpeg não foi encontrado. Reinstale o Vsy Converter.")
+        raise RuntimeError("FFmpeg was not found. Reinstall Vsy Converter.")
     suffix = source.suffix.lower()
     stem = Path(str(output_stem or "")).stem.strip()
     stem = re.sub(r"[<>:\"/\\|?*]", "-", stem).strip(" .")
@@ -83,12 +83,12 @@ def cut_media(ffmpeg, source, directory, output_stem, start, end,
         stem = source.stem + "-corte"
     target = _unique_target(directory, stem, suffix)
     duration = None if end is None else end - start
-    progress("Preparando o corte…")
+    progress("Preparing the cut…")
     with tempfile.TemporaryDirectory(prefix=".vsy-cut-", dir=directory) as temp:
         candidate = Path(temp) / ("resultado" + suffix)
         if suffix == ".gif":
             _cut_gif(ffmpeg, source, candidate, start, duration, cancelled, progress)
-            summary = "GIF recodificado mantendo resolução e animação"
+            summary = "GIF re-encoded while preserving resolution and animation"
         else:
             command = [str(ffmpeg), "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
                        "-ss", _time_arg(start), "-i", str(source)]
@@ -97,9 +97,9 @@ def cut_media(ffmpeg, source, directory, output_stem, start, end,
             command += ["-map", "0", "-c", "copy", "-map_metadata", "0",
                         "-avoid_negative_ts", "make_zero", str(candidate)]
             run_command(command, cancelled,
-                        lambda elapsed: progress(f"Cortando sem recompressão… {elapsed:.0f}s"))
-            summary = "vídeo/áudio copiado sem recompressão"
+                        lambda elapsed: progress(f"Cutting without recompression… {elapsed:.0f}s"))
+            summary = "video/audio copied without recompression"
         if cancelled.is_set():
-            raise Cancelled("Corte cancelado. O original foi preservado.")
+            raise Cancelled("Cut cancelled. The original was preserved.")
         os.rename(candidate, target)
     return target, summary

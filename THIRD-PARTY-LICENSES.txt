@@ -1,0 +1,15 @@
+THIRD-PARTY COMPONENTS
+
+Vsy Converter uses the following independent projects:
+
+ImageMagick
+Website: https://imagemagick.org/
+License: https://imagemagick.org/script/license.php
+
+FFmpeg
+Website: https://ffmpeg.org/
+Source code: https://ffmpeg.org/download.html
+Windows build: https://www.gyan.dev/ffmpeg/builds/
+Distributed build license: GPL version 3
+
+These components belong to their respective authors and projects.

@@ -16,7 +16,7 @@ if (-not (Test-Path -LiteralPath $ffmpegExe)) {
     Invoke-WebRequest -Uri $ffmpegUrl -OutFile $ffmpegZip
     Expand-Archive -LiteralPath $ffmpegZip -DestinationPath $ffmpegExtract -Force
     $downloadedFfmpeg = Get-ChildItem -LiteralPath $ffmpegExtract -Recurse -Filter 'ffmpeg.exe' | Select-Object -First 1
-    if (-not $downloadedFfmpeg) { throw 'FFmpeg não foi encontrado no pacote baixado.' }
+    if (-not $downloadedFfmpeg) { throw 'FFmpeg was not found in the downloaded package.' }
     Copy-Item -LiteralPath $downloadedFfmpeg.FullName -Destination $ffmpegExe
     Remove-Item -LiteralPath $ffmpegZip
     Remove-Item -LiteralPath $ffmpegExtract -Recurse
@@ -25,7 +25,7 @@ if (-not (Test-Path -LiteralPath $ffmpegExe)) {
 Push-Location $projectDir
 try {
     py -m PyInstaller --noconfirm --clean --onefile --windowed --icon .\assets\vs-conversor.ico --add-data 'assets\vs-conversor.ico;assets' --add-data 'assets\vs-conversor.png;assets' --name 'Vsy Converter' .\app.py
-    if ($LASTEXITCODE -ne 0) { throw 'Falha ao empacotar o aplicativo.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Application packaging failed.' }
 
     $compiler = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
     if (-not (Test-Path -LiteralPath $compiler)) {
@@ -35,10 +35,10 @@ try {
         $compiler = Join-Path $env:LOCALAPPDATA 'Programs\Inno Setup 6\ISCC.exe'
     }
     if (-not (Test-Path -LiteralPath $compiler)) {
-        throw 'Inno Setup 6 não foi encontrado.'
+        throw 'Inno Setup 6 was not found.'
     }
     & $compiler .\installer.iss
-    if ($LASTEXITCODE -ne 0) { throw 'Falha ao criar o instalador.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Installer creation failed.' }
 }
 finally {
     Pop-Location

@@ -1,5 +1,5 @@
 #define MyAppName "Vsy Converter"
-#define MyAppVersion "2.8.2"
+#define MyAppVersion "2.9.0"
 #define MyAppPublisher "frsttw"
 #define MyAppExeName "Vsy Converter.exe"
 
@@ -24,12 +24,12 @@ SetupIconFile=assets\vs-conversor.ico
 SetupLogging=yes
 
 [Languages]
-Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
+Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 Source: "dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "LEIA-ME.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "LICENCAS-DE-TERCEIROS.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "README.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "THIRD-PARTY-LICENSES.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "vendor\ffmpeg.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "vendor\ImageMagick-installer.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 
@@ -37,8 +37,8 @@ Source: "vendor\ImageMagick-installer.exe"; DestDir: "{tmp}"; Flags: deleteafter
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 
 [Run]
-Filename: "{tmp}\ImageMagick-installer.exe"; Parameters: "/VERYSILENT /NORESTART /SP-"; StatusMsg: "Instalando o ImageMagick..."; Flags: waituntilterminated; Check: not ImageMagickInstalled
-Filename: "{app}\{#MyAppExeName}"; Description: "Abrir o Vsy Converter"; Flags: nowait postinstall skipifsilent
+Filename: "{tmp}\ImageMagick-installer.exe"; Parameters: "/VERYSILENT /NORESTART /SP-"; StatusMsg: "Installing ImageMagick..."; Flags: waituntilterminated; Check: not ImageMagickInstalled
+Filename: "{app}\{#MyAppExeName}"; Description: "Launch Vsy Converter"; Flags: nowait postinstall skipifsilent
 
 [InstallDelete]
 Type: files; Name: "{app}\Conversor de Imagens.exe"
@@ -46,6 +46,8 @@ Type: files; Name: "{app}\VS Conversor.exe"
 Type: files; Name: "{autodesktop}\VS Conversor.lnk"
 Type: files; Name: "{autoprograms}\VS Conversor.lnk"
 Type: files; Name: "{autodesktop}\Vsy Converter.lnk"
+Type: files; Name: "{app}\LEIA-ME.txt"
+Type: files; Name: "{app}\LICENCAS-DE-TERCEIROS.txt"
 
 [Code]
 function ImageMagickInstalled: Boolean;

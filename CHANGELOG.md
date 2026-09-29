@@ -1,62 +1,50 @@
-# Histórico de versões
+# Changelog
 
-## 2.8.2
+## 2.9.0 — English interface
 
-- O aplicativo não é mais registrado para abrir automaticamente com o Windows.
-- O instalador mantém somente o atalho no menu Iniciar.
+- Translated the complete application interface, status messages, help text, and installer to English.
+- Reworked the project page, screenshots, banner, and documentation for an English-speaking audience.
+- Renamed documentation and license files to clear English names.
+- Kept existing destination-folder and GIF-FPS preferences compatible with previous releases.
+- Added an explicit English-only contribution policy for future releases.
 
-## 2.8.1
+## 2.8.2 — Start menu shortcut
 
-- Atalho do aplicativo corrigido para aparecer somente no menu Iniciar.
-- Removida a criação do atalho na Área de Trabalho.
+- The installer creates a Start menu shortcut only.
+- Vsy Converter does not register itself to start automatically with Windows.
+- Existing desktop and legacy shortcuts are removed during installation.
 
-## 2.8.0
+## 2.8.1 — Shortcut cleanup
 
-- Nova aba **Cortes** para vídeo, áudio e GIF.
-- Corte por início e fim em segundos ou `HH:MM:SS.000`.
-- Vídeos e áudios usam cópia direta dos fluxos para evitar perda por recompressão.
-- GIFs são recodificados mantendo resolução, duração e animação.
-- Pasta de cortes lembrada automaticamente e cancelamento seguro.
+- Corrected the application shortcut so it appears only in the Start menu.
+- Removed desktop shortcut creation.
 
-## 2.7.1
+## 2.8.0 — Media cuts
 
-- A opção de abertura automática que existia nessa versão foi posteriormente removida na 2.8.2; o comportamento atual é somente manual pelo menu Iniciar.
-- Registro de inicialização visível nas configurações de aplicativos de inicialização do Windows.
-- Ativação e desativação disponíveis diretamente no aplicativo, sem exigir permissões de administrador.
+- Added a dedicated Cuts tab for video, audio, and GIF.
+- Cut by start and end time in seconds or `HH:MM:SS.000`.
+- Video and audio use direct stream copy to avoid recompression.
+- GIFs are re-encoded while preserving resolution, duration, and animation.
+- Remembered cut destination folder and safe cancellation.
 
-## 2.7.0
+## 2.7.0 — Discord export
 
-- Nova aba Cortes para vídeo, áudio e GIF.
-- Campos de início e fim em segundos ou `HH:MM:SS.000`, com fim opcional.
-- Vídeo e áudio usam cópia direta dos fluxos, faixas e metadados, sem recompressão.
-- GIF é recodificado mantendo resolução e animação, com publicação temporária segura.
-- Pasta de cortes lembrada automaticamente.
-- Testes cobrindo vídeo, áudio, GIF, validação de intervalo e preservação do original.
+- Added local Discord avatar and profile-banner preparation.
+- Added size and dimension validation, conservative targets, and separate remembered folders.
+- Added GIF animation preservation and static first-frame export.
 
-## 2.6.1
+## 2.6.0 — Refined interface
 
-- Adicionada a marca discreta `frstt.dev` no cabeçalho do aplicativo e na apresentação do projeto.
+- Added the graphite and violet visual system, top navigation, responsive cards, and the `frstt.dev` project credit.
+- Added cancellable conversion, progress reporting, duplicate-name protection, and remembered output preferences.
+- Added 10–60 FPS video-to-GIF conversion with frame-aware timing.
 
-## 2.6.0
+## 2.3.0 — First public release
 
-### Interface
+- Image conversion with ImageMagick.
+- Video-to-GIF conversion with FFmpeg.
+- Batch processing, resize controls, metadata options, and a complete Windows installer.
 
-- Tema grafite com identidade violeta, navegação superior e cartões de opções.
-- Áreas Conversor e Discord reorganizadas, com rolagem para telas menores.
-- Botões de conversão e cancelamento sempre acessíveis.
-- Configurações protegidas enquanto uma tarefa está em andamento.
+## Known behavior
 
-### Conversão
-
-- Exportação de GIF para Discord com paleta global e processamento sequencial pelo FFmpeg.
-- Progresso por quadro durante a codificação e tempo decorrido por etapa.
-- Mensagem com tamanho obtido e meta quando a animação não cabe.
-- Cancelamento também no conversor geral, sem publicar arquivos incompletos de uma conversão interrompida.
-- Preferências de pasta e FPS preservadas.
-
-### Validação
-
-- 12 testes automatizados: conversão, dimensões, transparência, duração de GIF, vídeo a 60 FPS, cancelamento, nomes repetidos, pastas e interface.
-- Instalador inclui ImageMagick e FFmpeg; não exige Python no computador de destino.
-
-GIFs longos podem ultrapassar a meta do Discord mesmo após a redução de cores. O aplicativo não corta a duração nem descarta quadros para fazê-los caber.
+Long GIFs may exceed Discord's target even after color reduction. Vsy Converter never drops frames or shortens duration automatically; it reports the result and preserves the original.
